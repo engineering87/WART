@@ -1,6 +1,4 @@
 # WART (WebApi Real-Time)
-Turns WebApi calls into SignalR events.
-
 WART is a C# .NET Core library that allows extending any WebApi controller and forwarding any calls received by the controller to a SignalR hub.
 The SignalR hub on which the controller's call events will be sent will be used to send notifications with information about the call including the request and the response.
 
@@ -12,12 +10,21 @@ WART implements a custom controller which overrides the OnActionExecuting and On
 To use the WART library, each WebApi controller must extend the **WartController** controller:
 
 ```csharp
+using WART.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
 public class TestController : WartController
 ```
 
 you will also need to enable SignalR in the solution and map the **WartHub**.
+To do this, add the following configurations in the Startup.cs class:
+
+```csharp
+using WART.Hubs;
+using WART.Middleware;
+```
+
 In the ConfigureServices section add following:
 
 ```csharp
@@ -29,10 +36,12 @@ In the Configure section add the following:
 ```csharp
 app.UseEndpoints(endpoints =>
 {
-	endpoints.MapControllers();
-	endpoints.MapHub<WartHub>("/warthub");
+  endpoints.MapControllers();
+  endpoints.MapHub<WartHub>("/warthub");
 });
 ```
+
+at this point it will be sufficient to connect via SignalR to the WartHub to receive notifications in real time of any call on the controller endpoints.
 
 ### Contributing
 Thank you for considering to help out with the source code!
