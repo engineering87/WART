@@ -3,7 +3,7 @@ WART is a C# .NET Core library that allows extending any WebApi controller and f
 The SignalR hub on which the controller's call events will be sent will be used to send notifications with information about the call including the request and the response.
 
 ### How it works
-WART implements a custom controller which overrides the OnActionExecuting and OnActionExecuted methods to retrieve the request and the response and encapsulates them in a **WarEvent** object which will be sent via SignalR on the **WartHub**.
+WART implements a custom controller which overrides the OnActionExecuting and OnActionExecuted methods to retrieve the request and the response and encapsulates them in a **WartEvent** object which will be sent via SignalR on the **WartHub**.
 
 ### How to use it
 
