@@ -34,11 +34,7 @@ services.AddWartMiddleware();
 In the Configure section add the following:
 
 ```csharp
-app.UseEndpoints(endpoints =>
-{
-  endpoints.MapControllers();
-  endpoints.MapHub<WartHub>("/warthub");
-});
+app.UseWartMiddleware();
 ```
 
 at this point it will be sufficient to connect via SignalR to the WartHub to receive notifications in real time of any call on the controller endpoints.
