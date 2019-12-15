@@ -10,7 +10,8 @@ WART implements a custom controller which overrides the OnActionExecuting and On
 To use the WART library, each WebApi controller must extend the **WartController** controller:
 
 ```csharp
-using WART.Controllers;
+using WART_Core.Controllers;
+using WART_Core.Hubs;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -21,8 +22,7 @@ you will also need to enable SignalR in the solution and map the **WartHub**.
 To do this, add the following configurations in the Startup.cs class:
 
 ```csharp
-using WART.Hubs;
-using WART.Middleware;
+using WART_Core.Middleware;
 ```
 
 In the ConfigureServices section add following:
