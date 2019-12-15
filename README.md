@@ -38,6 +38,7 @@ app.UseWartMiddleware();
 ```
 
 at this point it will be sufficient to connect via SignalR to the WartHub to receive notifications in real time of any call on the controller endpoints.
+In the source code you can find a simple test client and WebApi project.
 
 ### Contributing
 Thank you for considering to help out with the source code!
