@@ -40,6 +40,11 @@ app.UseWartMiddleware();
 at this point it will be sufficient to connect via SignalR to the WartHub to receive notifications in real time of any call on the controller endpoints.
 In the source code you can find a simple test client and WebApi project.
 
+### NuGet
+
+The library is available on NuGet packetmanager.
+https://www.nuget.org/packages/WART-Core/
+
 ### Contributing
 Thank you for considering to help out with the source code!
 If you'd like to contribute, please fork, fix, commit and send a pull request for the maintainers to review and merge into the main code base.
