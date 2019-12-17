@@ -37,12 +37,26 @@ In the Configure section add the following:
 app.UseWartMiddleware();
 ```
 
-at this point it will be sufficient to connect via SignalR to the WartHub to receive notifications in real time of any call on the controller endpoints.
+at this point it will be sufficient to connect via SignalR to the WartHub to receive notifications in real time of any call on the controller endpoints. 
+For example:
+
+```csharp
+var hubConnection = new HubConnectionBuilder()
+    .WithUrl("http://localhost:52086/warthub")
+    .Build();
+    
+hubConnection.On<string>("Send", (data) =>
+{
+  // data is the WartEvent JSON
+});
+```
+
 In the source code you can find a simple test client and WebApi project.
 
 ### NuGet
 
 The library is available on NuGet packetmanager.
+
 https://www.nuget.org/packages/WART-Core/
 
 ### Contributing
