@@ -37,6 +37,12 @@ In the Configure section add the following:
 app.UseWartMiddleware();
 ```
 
+alternatively, it is possible to specify a custom hub name:
+
+```csharp
+app.UseWartMiddleware("hubname");
+```
+
 at this point it will be sufficient to connect via SignalR to the WartHub to receive notifications in real time of any call on the controller endpoints. 
 For example:
 
