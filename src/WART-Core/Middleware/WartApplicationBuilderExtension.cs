@@ -8,7 +8,8 @@ namespace WART_Core.Middleware
     public static class WartApplicationBuilderExtension
     {
         /// <summary>
-        /// Use WART dependency to IApplicationBuilder
+        /// Use WART dependency to IApplicationBuilder.
+        /// The default SignalR hub name is warthub
         /// </summary>
         /// <param name="app"></param>
         /// <returns></returns>
@@ -18,6 +19,23 @@ namespace WART_Core.Middleware
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<WartHub>("/warthub");
+            });
+
+            return app;
+        }
+
+        /// <summary>
+        /// Use WART dependency to IApplicationBuilder
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="hubName">The SignalR hub name</param>
+        /// <returns></returns>
+        public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, string hubName)
+        {
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
             });
 
             return app;

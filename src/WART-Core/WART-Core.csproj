@@ -4,14 +4,17 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>WART_Core</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Francesco Del Re &lt;francesco.delre.87@gmail.com&gt;</Authors>
-    <Company>Francesco Del Re &lt;francesco.delre.87@gmail.com&gt;</Company>
+    <Authors>Francesco Del Re</Authors>
+    <Company>Francesco Del Re</Company>
     <Description>WART is a C# .NET Core library that allows extending any WebApi controller and forwarding any calls received by the controller to a SignalR hub</Description>
     <Copyright>MIT</Copyright>
     <PackageProjectUrl>https://github.com/engineering87/WART</PackageProjectUrl>
     <RepositoryUrl>https://github.com/engineering87/WART</RepositoryUrl>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageLicenseExpression></PackageLicenseExpression>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <FileVersion>1.0.0.1</FileVersion>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

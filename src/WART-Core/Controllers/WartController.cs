@@ -46,11 +46,13 @@ namespace WART_Core.Controllers
             {
                 // get the request objects from RouteData
                 var request = context.RouteData.Values[RouteDataKey];
-                var method = context.HttpContext?.Request.Method;
+                var httpMethod = context.HttpContext?.Request.Method;
+                var httpPath = context.HttpContext?.Request.Path;
+                var remoteAddress = context.HttpContext?.Connection.RemoteIpAddress.ToString();
                 // get the object response
                 var response = objectResult.Value;
                 // create the new WartEvent and broadcast to all clients
-                var wartEvent = new WartEvent(request, response, method);
+                var wartEvent = new WartEvent(request, response, httpMethod, httpPath, remoteAddress);
                 _hubContext?.Clients.All.SendAsync("Send", wartEvent.ToString());
             }
 
