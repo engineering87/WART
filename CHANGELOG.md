@@ -11,5 +11,5 @@ All notable changes to this project will be documented in this file.
 - Add ExtraInfo to WartEvent
 - Add Request\Response deserialization method
 
-## [1.0.0](https://www.nuget.org/packages/WART-Core/1.0.0) - 2019-12-20
+## [1.0.0](https://www.nuget.org/packages/WART-Core/1.0.0) - 2019-12-14
 First commit
