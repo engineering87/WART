@@ -13,24 +13,22 @@ namespace WART_Core.Hubs
     {
         public override Task OnConnectedAsync()
         {
-            Console.WriteLine($"OnConnected {Context.ConnectionId}");
             return base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            Console.WriteLine($"OnDisconnected {Context.ConnectionId}");
             return base.OnDisconnectedAsync(exception);
         }
 
         /// <summary>
-        /// Broadcast the WartEvent to all the clients
+        /// Broadcast the WartEvent to all clients
         /// </summary>
         /// <param name="jsonWartEvent"></param>
         /// <returns></returns>
         public Task Send(string jsonWartEvent)
         {
-            return Clients.All.SendAsync("Send", jsonWartEvent);
+            return Clients?.All.SendAsync("Send", jsonWartEvent);
         }
     }
 }

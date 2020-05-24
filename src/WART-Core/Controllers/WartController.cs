@@ -20,8 +20,8 @@ namespace WART_Core.Controllers
 
         public WartController(IHubContext<WartHub> hubContext, ILogger<WartController> logger)
         {
-            this._hubContext = hubContext;
-            this._logger = logger;
+            _hubContext = hubContext;
+            _logger = logger;
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace WART_Core.Controllers
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             // add the request objects to RouteData
-            context.RouteData.Values.Add(RouteDataKey, context.ActionArguments);
+            context?.RouteData.Values.Add(RouteDataKey, context.ActionArguments);
 
             base.OnActionExecuting(context);
         }
@@ -42,7 +42,7 @@ namespace WART_Core.Controllers
         /// <param name="context"></param>
         public override void OnActionExecuted(ActionExecutedContext context)
         {
-            if (context.Result is ObjectResult objectResult)
+            if (context?.Result is ObjectResult objectResult)
             {
                 // get the request objects from RouteData
                 var request = context.RouteData.Values[RouteDataKey];
@@ -54,6 +54,7 @@ namespace WART_Core.Controllers
                 // create the new WartEvent and broadcast to all clients
                 var wartEvent = new WartEvent(request, response, httpMethod, httpPath, remoteAddress);
                 _hubContext?.Clients.All.SendAsync("Send", wartEvent.ToString());
+                _logger?.LogInformation("WartEvent", wartEvent.ToString());
             }
 
             base.OnActionExecuted(context);
