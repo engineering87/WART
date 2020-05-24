@@ -10,6 +10,7 @@ namespace WART_Core.Entity
     {
         public Guid EventId { get; set; }
         public DateTime TimeStamp { get; set; }
+        public DateTime UtcTimeStamp { get; set; }
         public string HttpMethod { get; set; }
         public string HttpPath { get; set; }
         public string RemoteAddress { get; set; }
@@ -32,6 +33,7 @@ namespace WART_Core.Entity
         {
             this.EventId = Guid.NewGuid();
             this.TimeStamp = DateTime.Now;
+            this.UtcTimeStamp = DateTime.UtcNow;
             this.HttpMethod = httpMethod;
             this.HttpPath = httpPath;
             this.RemoteAddress = remoteAddress;
@@ -49,6 +51,7 @@ namespace WART_Core.Entity
         {
             this.EventId = Guid.NewGuid();
             this.TimeStamp = DateTime.Now;
+            this.UtcTimeStamp = DateTime.UtcNow;
             this.HttpMethod = httpMethod;
             this.HttpPath = httpPath;
             this.RemoteAddress = remoteAddress;
@@ -56,6 +59,10 @@ namespace WART_Core.Entity
             this.JsonResponsePayload = response != null ? JsonConvert.SerializeObject(response) : string.Empty;
         }
 
+        /// <summary>
+        /// Return the JSON serialization
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
