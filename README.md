@@ -18,7 +18,15 @@ using WART_Core.Hubs;
 public class TestController : WartController
 ```
 
-you will also need to enable SignalR in the solution and map the **WartHub**.
+each controller must implement the following constructor, for example:
+
+```csharp
+public TestController(IHubContext<WartHub> messageHubContext, ILogger<WartController> logger) : base(messageHubContext, logger)
+{
+}
+```
+
+you also need to enable SignalR in the WebAPI solution and map the **WartHub**.
 To do this, add the following configurations in the Startup.cs class:
 
 ```csharp
