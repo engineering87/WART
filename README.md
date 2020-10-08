@@ -1,4 +1,4 @@
-![alt text](https://github.com/engineering87/WART/blob/master/wart_logo.png)
+<img src="https://github.com/engineering87/WART/blob/master/wart_logo.jpg" width="400">
 
 WART is a C# .NET Core library that allows extending any WebApi controller and forwarding any calls received by the controller to a SignalR hub.
 The SignalR hub on which the controller's call events will be sent will be used to send notifications with information about the call including the request and the response.
