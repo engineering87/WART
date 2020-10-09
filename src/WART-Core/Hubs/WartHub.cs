@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace WART_Core.Hubs
 {
@@ -11,13 +12,24 @@ namespace WART_Core.Hubs
     /// </summary>
     public class WartHub : Hub
     {
+        private readonly ILogger<WartHub> _logger;
+
+        public WartHub(ILogger<WartHub> logger)
+        {
+            this._logger = logger;
+        }
+
         public override Task OnConnectedAsync()
         {
+            _logger?.LogInformation($"OnConnect {Context.ConnectionId}");
+
             return base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
+            _logger?.LogInformation($"OnDisconnect {Context.ConnectionId}");
+
             return base.OnDisconnectedAsync(exception);
         }
 
@@ -28,6 +40,8 @@ namespace WART_Core.Hubs
         /// <returns></returns>
         public Task Send(string jsonWartEvent)
         {
+            _logger?.LogInformation($"Send {jsonWartEvent}");
+
             return Clients?.All.SendAsync("Send", jsonWartEvent);
         }
     }
