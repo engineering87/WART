@@ -1,4 +1,4 @@
-[![Github license](mit.svg)](https://github.com/engineering87/WART/blob/master/LICENSE)
+[![Github license](mit.svg)](https://github.com/engineering87/WART/blob/develop/LICENSE)
 
 <img src="https://github.com/engineering87/WART/blob/master/wart_logo.jpg" width="300">
 
