@@ -1,20 +1,23 @@
-﻿// (c) 2019 Francesco Del Re <francesco.delre.87@gmail.com>
+﻿// (c) 2021 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
-using System;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace WART_Core.Hubs
 {
     /// <summary>
-    /// The WART SignalR hub.
+    /// The WART SignalR hub with JWT authentication.
     /// </summary>
-    public class WartHub : Hub
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public class WartHubJwt : Hub
     {
-        private readonly ILogger<WartHub> _logger;
+        private readonly ILogger<WartHubJwt> _logger;
 
-        public WartHub(ILogger<WartHub> logger)
+        public WartHubJwt(ILogger<WartHubJwt> logger)
         {
             this._logger = logger;
         }

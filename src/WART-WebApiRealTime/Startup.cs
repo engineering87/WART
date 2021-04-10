@@ -1,4 +1,4 @@
-// (c) 2019 Francesco Del Re <francesco.delre.87@gmail.com>
+// (c) 2021 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using WART_Core.Enum;
 using WART_Core.Middleware;
 
 namespace WART_Api
@@ -25,7 +26,10 @@ namespace WART_Api
             services.AddControllers();
 
             // add the Wart middleware service extension
-            services.AddWartMiddleware();
+            // default without authentication
+            //services.AddWartMiddleware();
+            // with authentication
+            services.AddWartMiddleware(hubType:HubType.JwtAuthentication, tokenKey:"dn3341fmcscscwe28419");
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -62,10 +66,11 @@ namespace WART_Api
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
             // use the Wart middleware builder extension
-            app.UseWartMiddleware();
+            // default without authentication
+            //app.UseWartMiddleware();
+            // with authentication
+            app.UseWartMiddleware(HubType.JwtAuthentication);
         }
     }
 }

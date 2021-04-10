@@ -1,4 +1,4 @@
-﻿// (c) 2019 Francesco Del Re <francesco.delre.87@gmail.com>
+﻿// (c) 2021 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -12,13 +12,13 @@ namespace WART_Core.Controllers
     /// <summary>
     /// The WART Controller
     /// </summary>
-    public class WartController : Controller
+    public class WartControllerJwt : Controller
     {
-        private readonly ILogger<WartController> _logger;
-        private readonly IHubContext<WartHub> _hubContext;
+        private readonly ILogger<WartControllerJwt> _logger;
+        private readonly IHubContext<WartHubJwt> _hubContext;
         private const string RouteDataKey = "REQUEST";
 
-        public WartController(IHubContext<WartHub> hubContext, ILogger<WartController> logger)
+        public WartControllerJwt(IHubContext<WartHubJwt> hubContext, ILogger<WartControllerJwt> logger)
         {
             _hubContext = hubContext;
             _logger = logger;

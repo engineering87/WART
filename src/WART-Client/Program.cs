@@ -6,12 +6,21 @@ namespace WART_Client
 {
     public class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             Console.WriteLine("Starting WartTestClient");
+            
+            #region JWT Client Test
 
-            var client = new WartTestClient();
-            client.ConnectAsync();
+            WartTestClientJwt.ConnectAsync();
+
+            #endregion
+
+            #region No authentication Client Test
+
+            //WartTestClient.ConnectAsync();
+
+            #endregion
 
             Console.ReadLine();
         }
