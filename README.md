@@ -3,7 +3,7 @@
 <img src="https://github.com/engineering87/WART/blob/master/wart_logo.jpg" width="300">
 
 WART is a C# .NET Core library that allows extending any WebApi controller and forwarding any calls received by the controller to a SignalR hub.
-The SignalR hub on which the controller's call events will be sent will be used to send notifications with information about the call including the request and the response.
+The SignalR hub on which the controller's call events will be sent will be used to send notifications with information about the call including the request and the response. WART supports JWT authentication for SignalR.
 
 ### How it works
 WART implements a custom controller which overrides the OnActionExecuting and OnActionExecuted methods to retrieve the request and the response and encapsulates them in a **WartEvent** object which will be sent via SignalR on the **WartHub**.
@@ -24,12 +24,24 @@ public class TestController : WartController
 each controller must implement the following constructor, for example:
 
 ```csharp
-public TestController(IHubContext<WartHub> messageHubContext, ILogger<WartController> logger) : base(messageHubContext, logger)
+public TestController(IHubContext<WartHub> messageHubContext, 
+ILogger<WartController> logger) : base(messageHubContext, logger)
 {
 }
 ```
 
-you also need to enable SignalR in the WebAPI solution and map the **WartHub**.
+WART support JWT bearer authentication on SignalR hub, if you want to use JWT authentication use the followinf controller extension:
+
+```csharp
+using WART_Core.Controllers;
+using WART_Core.Hubs;
+
+[ApiController]
+[Route("api/[controller]")]
+public class TestController : WartControllerJwt
+```
+
+You also need to enable SignalR in the WebAPI solution and map the **WartHub**.
 To do this, add the following configurations in the Startup.cs class:
 
 ```csharp
@@ -42,13 +54,26 @@ In the ConfigureServices section add following:
 services.AddWartMiddleware();
 ```
 
+or by specifying JWT authentication:
+
+
+```csharp
+services.AddWartMiddleware(hubType:HubType.JwtAuthentication, tokenKey:"password_here");
+```
+
 In the Configure section add the following:
 
 ```csharp
 app.UseWartMiddleware();
 ```
 
-alternatively, it is possible to specify a custom hub name:
+or by specifying JWT authentication:
+
+```csharp
+app.UseWartMiddleware(HubType.JwtAuthentication);
+```
+
+Alternatively, it is possible to specify a custom hub name:
 
 ```csharp
 app.UseWartMiddleware("hubname");
@@ -60,6 +85,25 @@ For example:
 ```csharp
 var hubConnection = new HubConnectionBuilder()
     .WithUrl("http://localhost:52086/warthub")
+    .Build();
+    
+hubConnection.On<string>("Send", (data) =>
+{
+  // data is the WartEvent JSON
+});
+```
+
+or with JWT authentication:
+
+```csharp
+var hubConnection = new HubConnectionBuilder()
+    .WithUrl($"http://localhost:51392/warthub", options =>
+    {
+        options.SkipNegotiation = true;
+        options.Transports = HttpTransportType.WebSockets;
+        options.AccessTokenProvider = () => Task.FromResult(GenerateToken());
+    })
+    .WithAutomaticReconnect()
     .Build();
     
 hubConnection.On<string>("Send", (data) =>
