@@ -30,7 +30,7 @@ ILogger<WartController> logger) : base(messageHubContext, logger)
 }
 ```
 
-WART support JWT bearer authentication on SignalR hub, if you want to use JWT authentication use the followinf controller extension:
+WART support JWT bearer authentication on SignalR hub, if you want to use JWT authentication use the following controller extension:
 
 ```csharp
 using WART_Core.Controllers;
