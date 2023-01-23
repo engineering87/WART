@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
 using WART_Core.Enum;
 using WART_Core.Middleware;
 
@@ -29,7 +30,7 @@ namespace WART_Api
             // default without authentication
             //services.AddWartMiddleware();
             // with authentication
-            services.AddWartMiddleware(hubType:HubType.JwtAuthentication, tokenKey:"dn3341fmcscscwe28419");
+            services.AddWartMiddleware(hubType: HubType.JwtAuthentication, tokenKey: "dn3341fmcscscwe28419");
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -62,6 +63,7 @@ namespace WART_Api
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "WART-Api");
+                c.RoutePrefix = string.Empty;
             });
 
             app.UseRouting();
