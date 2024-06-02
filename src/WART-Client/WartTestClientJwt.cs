@@ -15,20 +15,18 @@ namespace WART_Client
     /// </summary>
     public class WartTestClientJwt
     {
-        private const string Token = "dn3341fmcscscwe28419";
-        private static readonly SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Token));
         private static readonly JwtSecurityTokenHandler JwtTokenHandler = new JwtSecurityTokenHandler();
 
-        public static async void ConnectAsync()
+        public static async void ConnectAsync(string wartHubUrl, string key)
         {
             try
             {
                 var hubConnection = new HubConnectionBuilder()
-                    .WithUrl($"http://localhost:51392/warthub", options =>
+                    .WithUrl(wartHubUrl, options =>
                     {
                         options.SkipNegotiation = true;
                         options.Transports = HttpTransportType.WebSockets;
-                        options.AccessTokenProvider = () => Task.FromResult(GenerateToken());
+                        options.AccessTokenProvider = () => Task.FromResult(GenerateToken(key));
                     })
                     .WithAutomaticReconnect()
                     .Build();
@@ -47,8 +45,9 @@ namespace WART_Client
             }
         }
 
-        private static string GenerateToken()
+        private static string GenerateToken(string key)
         {
+            var SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(expires: DateTime.UtcNow.AddHours(24), signingCredentials: credentials);
             return JwtTokenHandler.WriteToken(token);

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
+using System.Collections.Generic;
 using WART_Core.Enum;
 using WART_Core.Middleware;
 
@@ -30,7 +31,7 @@ namespace WART_Api
             // default without authentication
             //services.AddWartMiddleware();
             // with authentication
-            services.AddWartMiddleware(hubType: HubType.JwtAuthentication, tokenKey: "dn3341fmcscscwe28419");
+            services.AddWartMiddleware(hubType: HubType.JwtAuthentication, tokenKey: "dn3341fmcscscwe28419brhwbwgbss4t");
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -53,8 +54,6 @@ namespace WART_Api
                 app.UseHsts();
             }
 
-            //app.UseHttpsRedirection();
-
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
@@ -66,13 +65,20 @@ namespace WART_Api
                 c.RoutePrefix = string.Empty;
             });
 
-            app.UseRouting();
-
             // use the Wart middleware builder extension
             // default without authentication
             //app.UseWartMiddleware();
+
             // with authentication
             app.UseWartMiddleware(HubType.JwtAuthentication);
+
+            // multiple hub with authentication
+            //var hubNameList = new List<string>
+            //{
+            //    "warthub",
+            //    "warthub_clone"
+            //};
+            //app.UseWartMiddleware(hubNameList, HubType.JwtAuthentication);
         }
     }
 }

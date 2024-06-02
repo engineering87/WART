@@ -35,7 +35,8 @@ namespace WART_Core.Authentication.JWT
 
             services.AddLogging(configure => configure.AddConsole());
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
+            var key = Encoding.UTF8.GetBytes(tokenKey);
+            var securityKey = new SymmetricSecurityKey(key);
 
             services.AddAuthentication(options =>
             {

@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29503.13
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WART-Api", "WART-WebApiRealTime\WART-Api.csproj", "{2F57B8CA-6C41-485D-82D1-F9039FD11360}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WART-Client", "WART-Client\WART-Client.csproj", "{57AD2261-F3CA-49C6-9BC0-FCB2DC5A86E2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WART-Core", "WART-Core\WART-Core.csproj", "{7588AAE3-E882-468E-81A0-90B8F92D7B72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WART-Tests", "WART-Tests\WART-Tests.csproj", "{A80F18C6-1FF2-4F13-A65D-9134EE44158A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{7588AAE3-E882-468E-81A0-90B8F92D7B72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7588AAE3-E882-468E-81A0-90B8F92D7B72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7588AAE3-E882-468E-81A0-90B8F92D7B72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A80F18C6-1FF2-4F13-A65D-9134EE44158A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A80F18C6-1FF2-4F13-A65D-9134EE44158A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A80F18C6-1FF2-4F13-A65D-9134EE44158A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A80F18C6-1FF2-4F13-A65D-9134EE44158A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
