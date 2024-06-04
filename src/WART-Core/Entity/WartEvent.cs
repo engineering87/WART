@@ -1,7 +1,9 @@
 ﻿// (c) 2019 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
-using Newtonsoft.Json;
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using WART_Core.Serialization;
 
 namespace WART_Core.Entity
 {
@@ -14,7 +16,9 @@ namespace WART_Core.Entity
         public string HttpMethod { get; set; }
         public string HttpPath { get; set; }
         public string RemoteAddress { get; set; }
+        [JsonConverter(typeof(JsonArrayOrObjectStringConverter))]
         public string JsonRequestPayload { get; set; }
+        [JsonConverter(typeof(JsonArrayOrObjectStringConverter))]
         public string JsonResponsePayload { get; set; }
         public string ExtraInfo { get; set; }
 
@@ -49,14 +53,20 @@ namespace WART_Core.Entity
         /// <param name="remoteAddress"></param>
         public WartEvent(object request, object response, string httpMethod, string httpPath, string remoteAddress)
         {
+            var serializeOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
             this.EventId = Guid.NewGuid();
             this.TimeStamp = DateTime.Now;
             this.UtcTimeStamp = DateTime.UtcNow;
             this.HttpMethod = httpMethod;
             this.HttpPath = httpPath;
             this.RemoteAddress = remoteAddress;
-            this.JsonRequestPayload = request != null ? JsonConvert.SerializeObject(request) : string.Empty;
-            this.JsonResponsePayload = response != null ? JsonConvert.SerializeObject(response) : string.Empty;
+            this.JsonRequestPayload = request != null ? JsonSerializer.Serialize(request, serializeOptions) : string.Empty;
+            this.JsonResponsePayload = response != null ? JsonSerializer.Serialize(response, serializeOptions) : string.Empty;
         }
 
         /// <summary>
@@ -65,7 +75,13 @@ namespace WART_Core.Entity
         /// <returns></returns>
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(this);
+            var serializeOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            return JsonSerializer.Serialize(this, serializeOptions);
         }
 
         /// <summary>
@@ -75,8 +91,8 @@ namespace WART_Core.Entity
         /// <returns></returns>
         public T GetRequestObject<T>() where T : class
         {
-            return string.IsNullOrEmpty(JsonRequestPayload) ?
-                JsonConvert.DeserializeObject<T>(JsonRequestPayload) : null;
+            return !string.IsNullOrEmpty(JsonRequestPayload) ?
+                JsonSerializer.Deserialize<T>(JsonRequestPayload) : null;
         }
 
         /// <summary>
@@ -86,8 +102,8 @@ namespace WART_Core.Entity
         /// <returns></returns>
         public T GetResponseObject<T>() where T : class
         {
-            return string.IsNullOrEmpty(JsonResponsePayload) ?
-                JsonConvert.DeserializeObject<T>(JsonResponsePayload) : null;
+            return !string.IsNullOrEmpty(JsonResponsePayload) ?
+                JsonSerializer.Deserialize<T>(JsonResponsePayload) : null;
         }
-    }
+    }    
 }

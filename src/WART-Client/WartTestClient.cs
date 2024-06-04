@@ -10,12 +10,12 @@ namespace WART_Client
     /// </summary>
     public class WartTestClient
     {
-        public static async void ConnectAsync()
+        public static async void ConnectAsync(string wartHubUrl)
         {
             try
             {
                 var hubConnection = new HubConnectionBuilder()
-                    .WithUrl($"http://localhost:51392/warthub")
+                    .WithUrl(wartHubUrl)
                     .WithAutomaticReconnect()
                     .Build();
 

@@ -28,7 +28,7 @@ namespace WART_Core.Middleware
 
             services.AddSignalR(options =>
             {
-                options.EnableDetailedErrors = true;
+                options.EnableDetailedErrors = true; 
             });
 
             return services;

@@ -7,7 +7,13 @@ namespace WART_Core.Enum
     /// </summary>
     public enum HubType
     {
+        /// <summary>
+        /// Simple SignalR hub without authentication
+        /// </summary>
         NoAuthentication,
+        /// <summary>
+        /// SignalR hub with JWT authentication
+        /// </summary>
         JwtAuthentication
     }
 }
