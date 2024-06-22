@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 using WART_Core.Entity;
 using WART_Core.Hubs;
 
@@ -24,10 +26,15 @@ namespace WART_Core.Controllers
             _logger = logger;
         }
 
+        public WartController(IHubContext<WartHub> hubContext)
+        {
+            _hubContext = hubContext;
+        }
+
         /// <summary>
         /// WART OnActionExecuting override
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">ActionExecutedContext context</param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             // add the request objects to RouteData
@@ -39,8 +46,8 @@ namespace WART_Core.Controllers
         /// <summary>
         /// WART OnActionExecuted override
         /// </summary>
-        /// <param name="context"></param>
-        public override void OnActionExecuted(ActionExecutedContext context)
+        /// <param name="context">ActionExecutedContext context</param>
+        public override async void OnActionExecuted(ActionExecutedContext context)
         {
             if (context?.Result is ObjectResult objectResult)
             {
@@ -48,16 +55,34 @@ namespace WART_Core.Controllers
                 var request = context.RouteData.Values[RouteDataKey];
                 var httpMethod = context.HttpContext?.Request.Method;
                 var httpPath = context.HttpContext?.Request.Path;
-                var remoteAddress = context.HttpContext.Connection.RemoteIpAddress?.ToString();
+                var remoteAddress = context.HttpContext?.Connection.RemoteIpAddress?.ToString();
                 // get the object response
                 var response = objectResult.Value;
                 // create the new WartEvent and broadcast to all clients
                 var wartEvent = new WartEvent(request, response, httpMethod, httpPath, remoteAddress);
-                _hubContext?.Clients.All.SendAsync("Send", wartEvent.ToString());
-                _logger?.LogInformation("WartEvent", wartEvent.ToString());
+                await SendToHub(wartEvent);                
             }
 
             base.OnActionExecuted(context);
+        }
+
+        /// <summary>
+        /// Send the current event to the SignalR hub.
+        /// </summary>
+        /// <param name="wartEvent">The current WartEvent</param>
+        /// <returns></returns>
+        private async Task SendToHub(WartEvent wartEvent)
+        {
+            try
+            {
+                await _hubContext?.Clients.All.SendAsync("Send", wartEvent.ToString());
+
+                _logger?.LogInformation(message: "WartEvent", wartEvent.ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error sending WartEvent to clients");
+            }
         }
     }
 }

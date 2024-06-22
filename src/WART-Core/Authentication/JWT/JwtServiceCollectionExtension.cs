@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Linq;
 
 namespace WART_Core.Authentication.JWT
 {
@@ -20,7 +22,7 @@ namespace WART_Core.Authentication.JWT
         /// <param name="services"></param>
         /// <param name="tokenKey"></param>
         /// <returns></returns>
-        public static IServiceCollection AddJwtMiddleware(this IServiceCollection services, string tokenKey = "")
+        public static IServiceCollection AddJwtMiddleware(this IServiceCollection services, string tokenKey)
         {
             if (string.IsNullOrEmpty(tokenKey))
             {
@@ -73,6 +75,15 @@ namespace WART_Core.Authentication.JWT
             services.AddSignalR(options =>
             {
                 options.EnableDetailedErrors = true;
+                options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
             });
 
             return services;

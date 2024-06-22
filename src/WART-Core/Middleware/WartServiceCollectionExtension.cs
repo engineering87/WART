@@ -2,8 +2,11 @@
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
 using WART_Core.Authentication.JWT;
 using WART_Core.Enum;
 
@@ -28,7 +31,16 @@ namespace WART_Core.Middleware
 
             services.AddSignalR(options =>
             {
-                options.EnableDetailedErrors = true; 
+                options.EnableDetailedErrors = true;
+                options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
             });
 
             return services;

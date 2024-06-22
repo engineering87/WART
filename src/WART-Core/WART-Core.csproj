@@ -14,7 +14,7 @@
     <PackageLicenseExpression></PackageLicenseExpression>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <FileVersion>4.0.0.0</FileVersion>
-    <Version>5.2.0</Version>
+    <Version>5.3.0</Version>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 

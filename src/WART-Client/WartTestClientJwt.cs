@@ -24,9 +24,10 @@ namespace WART_Client
                 var hubConnection = new HubConnectionBuilder()
                     .WithUrl(wartHubUrl, options =>
                     {
-                        options.SkipNegotiation = true;
-                        options.Transports = HttpTransportType.WebSockets;
                         options.AccessTokenProvider = () => Task.FromResult(GenerateToken(key));
+                        options.Transports = HttpTransportType.WebSockets |
+                                             HttpTransportType.ServerSentEvents |
+                                             HttpTransportType.LongPolling;
                     })
                     .WithAutomaticReconnect()
                     .Build();
@@ -34,7 +35,23 @@ namespace WART_Client
                 hubConnection.On<string>("Send", (data) =>
                 {
                     Console.WriteLine(data);
+                    Console.WriteLine($"Message size: {Encoding.UTF8.GetBytes(data).Length} byte");
                     Console.WriteLine(Environment.NewLine);
+                });
+
+                hubConnection.Closed += async (exception) =>
+                {
+                    Console.WriteLine(exception);
+                    Console.WriteLine(Environment.NewLine);
+                    await Task.Delay(new Random().Next(0, 5) * 1000);
+                    await hubConnection.StartAsync();
+                };
+
+                hubConnection.On<Exception>("ConnectionFailed", (exception) =>
+                {
+                    Console.WriteLine(exception);
+                    Console.WriteLine(Environment.NewLine);
+                    return Task.CompletedTask;
                 });
 
                 await hubConnection.StartAsync();
