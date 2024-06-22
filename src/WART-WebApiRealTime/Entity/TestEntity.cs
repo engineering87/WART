@@ -7,7 +7,7 @@ namespace WART_Api.Entity
     [Serializable]
     public class TestEntity
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public DateTime Date { get; set; }
         public string Param { get; set; }
     }

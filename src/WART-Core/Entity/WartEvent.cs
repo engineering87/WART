@@ -1,8 +1,8 @@
 ﻿// (c) 2019 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using System;
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using WART_Core.Helpers;
 using WART_Core.Serialization;
 
 namespace WART_Core.Entity
@@ -53,20 +53,14 @@ namespace WART_Core.Entity
         /// <param name="remoteAddress"></param>
         public WartEvent(object request, object response, string httpMethod, string httpPath, string remoteAddress)
         {
-            var serializeOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
             this.EventId = Guid.NewGuid();
             this.TimeStamp = DateTime.Now;
             this.UtcTimeStamp = DateTime.UtcNow;
             this.HttpMethod = httpMethod;
             this.HttpPath = httpPath;
             this.RemoteAddress = remoteAddress;
-            this.JsonRequestPayload = request != null ? JsonSerializer.Serialize(request, serializeOptions) : string.Empty;
-            this.JsonResponsePayload = response != null ? JsonSerializer.Serialize(response, serializeOptions) : string.Empty;
+            this.JsonRequestPayload = SerializationHelper.Serialize(request);
+            this.JsonResponsePayload = SerializationHelper.Serialize(response);
         }
 
         /// <summary>
@@ -75,13 +69,7 @@ namespace WART_Core.Entity
         /// <returns></returns>
         public override string ToString()
         {
-            var serializeOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
-            return JsonSerializer.Serialize(this, serializeOptions);
+            return SerializationHelper.Serialize(this);
         }
 
         /// <summary>
@@ -91,8 +79,7 @@ namespace WART_Core.Entity
         /// <returns></returns>
         public T GetRequestObject<T>() where T : class
         {
-            return !string.IsNullOrEmpty(JsonRequestPayload) ?
-                JsonSerializer.Deserialize<T>(JsonRequestPayload) : null;
+            return SerializationHelper.Deserialize<T>(JsonRequestPayload);
         }
 
         /// <summary>
@@ -102,8 +89,7 @@ namespace WART_Core.Entity
         /// <returns></returns>
         public T GetResponseObject<T>() where T : class
         {
-            return !string.IsNullOrEmpty(JsonResponsePayload) ?
-                JsonSerializer.Deserialize<T>(JsonResponsePayload) : null;
+            return SerializationHelper.Deserialize<T>(JsonResponsePayload);
         }
     }    
 }
