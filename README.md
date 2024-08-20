@@ -3,8 +3,7 @@
 
 <img src="https://github.com/engineering87/WART/blob/develop/wart_logo.jpg" width="300">
 
-WART is a C# .NET library that allows extending any WebApi controller and forwarding any calls received by the controller to a SignalR hub.
-The SignalR hub on which the controller's call events will be sent will be used to send notifications with information about the call including the request and the response. WART supports JWT authentication for SignalR.
+WART is a C# .NET library that enables you to extend any Web API controller and forward incoming calls directly to a SignalR hub. This hub then broadcasts notifications containing detailed information about the calls, including both the request and the response. Additionally, WART supports JWT authentication for secure communication with SignalR.
 
 ### How it works
 WART implements a custom controller which overrides the OnActionExecuting and OnActionExecuted methods to retrieve the request and the response and encapsulates them in a **WartEvent** object which will be sent via SignalR on the **WartHub**.
