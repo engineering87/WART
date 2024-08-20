@@ -1,4 +1,5 @@
-[![Github license](mit.svg)](https://github.com/engineering87/WART/blob/develop/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Nuget](https://img.shields.io/nuget/v/WART-Core?style=plastic)](https://www.nuget.org/packages/WART-Core)
 
 <img src="https://github.com/engineering87/WART/blob/develop/wart_logo.jpg" width="300">
 
