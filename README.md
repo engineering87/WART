@@ -1,10 +1,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Nuget](https://img.shields.io/nuget/v/WART-Core?style=plastic)](https://www.nuget.org/packages/WART-Core)
+[![issues - dotnet-design-patterns](https://img.shields.io/github/issues/engineering87/WART)](https://github.com/engineering87/WART/issues)
+[![stars - dotnet-design-patterns](https://img.shields.io/github/stars/engineering87/WART?style=social)](https://github.com/engineering87/WART)
 
 <img src="https://github.com/engineering87/WART/blob/develop/wart_logo.jpg" width="300">
 
-WART is a C# .NET library that allows extending any WebApi controller and forwarding any calls received by the controller to a SignalR hub.
-The SignalR hub on which the controller's call events will be sent will be used to send notifications with information about the call including the request and the response. WART supports JWT authentication for SignalR.
+WART is a C# .NET library that enables you to extend any Web API controller and forward incoming calls directly to a SignalR hub. This hub then broadcasts notifications containing detailed information about the calls, including both the request and the response. Additionally, WART supports JWT authentication for secure communication with SignalR.
 
 ### How it works
 WART implements a custom controller which overrides the OnActionExecuting and OnActionExecuted methods to retrieve the request and the response and encapsulates them in a **WartEvent** object which will be sent via SignalR on the **WartHub**.
@@ -127,9 +128,8 @@ If you'd like to contribute, please fork, fix, commit and send a pull request fo
 
 **Getting started with Git and GitHub**
 
- * [Setting up Git for Windows and connecting to GitHub](http://help.github.com/win-set-up-git/)
- * [Forking a GitHub repository](http://help.github.com/fork-a-repo/)
- * [The simple guide to GIT guide](http://rogerdudler.github.com/git-guide/)
+ * [Setting up Git](https://docs.github.com/en/get-started/getting-started-with-git/set-up-git)
+ * [Fork the repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)
  * [Open an issue](https://github.com/engineering87/WART/issues) if you encounter a bug or have a suggestion for improvements/features
 
 ### Licensee
