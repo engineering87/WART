@@ -1,5 +1,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Nuget](https://img.shields.io/nuget/v/WART-Core?style=plastic)](https://www.nuget.org/packages/WART-Core)
+[![issues - dotnet-design-patterns](https://img.shields.io/github/issues/engineering87/WART)](https://github.com/engineering87/WART/issues)
+[![stars - dotnet-design-patterns](https://img.shields.io/github/stars/engineering87/WART?style=social)](https://github.com/engineering87/WART)
 
 <img src="https://github.com/engineering87/WART/blob/develop/wart_logo.jpg" width="300">
 
