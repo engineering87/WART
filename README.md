@@ -1,3 +1,5 @@
+# WART - WebApi Real Time
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Nuget](https://img.shields.io/nuget/v/WART-Core?style=plastic)](https://www.nuget.org/packages/WART-Core)
 [![issues - dotnet-design-patterns](https://img.shields.io/github/issues/engineering87/WART)](https://github.com/engineering87/WART/issues)
@@ -8,7 +10,7 @@
 WART is a C# .NET library that enables you to extend any Web API controller and forward incoming calls directly to a SignalR hub. This hub then broadcasts notifications containing detailed information about the calls, including both the request and the response. Additionally, WART supports JWT authentication for secure communication with SignalR.
 
 ### How it works
-WART implements a custom controller which overrides the OnActionExecuting and OnActionExecuted methods to retrieve the request and the response and encapsulates them in a **WartEvent** object which will be sent via SignalR on the **WartHub**.
+WART implements a custom controller which overrides the `OnActionExecuting` and `OnActionExecuted` methods to retrieve the request and the response and encapsulates them in a **WartEvent** object which will be sent via SignalR on the **WartHub**.
 
 ### How to use it
 
@@ -136,4 +138,4 @@ If you'd like to contribute, please fork, fix, commit and send a pull request fo
 WART source code is available under MIT License, see license in the source.
 
 ### Contact
-Please contact at francesco.delre.87[at]gmail.com for any details.
+Please contact at francesco.delre[at]protonmail.com for any details.
