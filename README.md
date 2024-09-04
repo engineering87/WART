@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Nuget](https://img.shields.io/nuget/v/WART-Core?style=plastic)](https://www.nuget.org/packages/WART-Core)
+![NuGet Downloads](https://img.shields.io/nuget/dt/WART-Core)
 [![issues - wart](https://img.shields.io/github/issues/engineering87/WART)](https://github.com/engineering87/WART/issues)
 [![stars - wart](https://img.shields.io/github/stars/engineering87/WART?style=social)](https://github.com/engineering87/WART)
 
