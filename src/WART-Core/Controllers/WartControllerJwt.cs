@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System;
 using WART_Core.Entity;
 using WART_Core.Hubs;
+using System.Linq;
+using WART_Core.Filters;
 
 namespace WART_Core.Controllers
 {
@@ -51,16 +53,21 @@ namespace WART_Core.Controllers
         {
             if (context?.Result is ObjectResult objectResult)
             {
-                // get the request objects from RouteData
-                var request = context.RouteData.Values[RouteDataKey];
-                var httpMethod = context.HttpContext?.Request.Method;
-                var httpPath = context.HttpContext?.Request.Path;
-                var remoteAddress = context.HttpContext?.Connection.RemoteIpAddress?.ToString();
-                // get the object response
-                var response = objectResult.Value;
-                // create the new WartEvent and broadcast to all clients
-                var wartEvent = new WartEvent(request, response, httpMethod, httpPath, remoteAddress);
-                await SendToHub(wartEvent);
+                // check for wart exclusion
+                var exclusion = context.Filters.Any(f => f.GetType().Name == nameof(ExcludeWartAttribute));
+                if (!exclusion)
+                {
+                    // get the request objects from RouteData
+                    var request = context.RouteData.Values[RouteDataKey];
+                    var httpMethod = context.HttpContext?.Request.Method;
+                    var httpPath = context.HttpContext?.Request.Path;
+                    var remoteAddress = context.HttpContext?.Connection.RemoteIpAddress?.ToString();
+                    // get the object response
+                    var response = objectResult.Value;
+                    // create the new WartEvent and broadcast to all clients
+                    var wartEvent = new WartEvent(request, response, httpMethod, httpPath, remoteAddress);
+                    await SendToHub(wartEvent);
+                }
             }
 
             base.OnActionExecuted(context);
@@ -77,7 +84,7 @@ namespace WART_Core.Controllers
             {
                 await _hubContext?.Clients.All.SendAsync("Send", wartEvent.ToString());
 
-                _logger?.LogInformation(message: "WartEvent", wartEvent.ToString());
+                _logger?.LogInformation(message: nameof(WartEvent), wartEvent.ToString());
             }
             catch (Exception ex)
             {
