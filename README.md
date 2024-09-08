@@ -119,6 +119,23 @@ hubConnection.On<string>("Send", (data) =>
 
 In the source code you can find a simple test client and WebApi project.
 
+### Excluding APIs from Event Propagation
+There might be scenarios where you want to exclude specific APIs from propagating events to connected clients. This can be particularly useful when certain endpoints should not trigger updates, notifications, or other real-time messages through SignalR. To achieve this, you can use a custom filter called `ExcludeWartAttribute`. By decorating the desired API endpoints with this attribute, you can prevent them from being included in the SignalR event propagation logic, for example:
+
+```csharp
+[HttpGet("{id}")]
+[ExcludeWart]
+public ActionResult<TestEntity> Get(int id)
+{
+    var item = Items.FirstOrDefault(x => x.Id == id);
+    if (item == null)
+    {
+        return NotFound();
+    }
+    return item;
+}
+```
+
 ### NuGet
 
 The library is available on NuGet packetmanager.
