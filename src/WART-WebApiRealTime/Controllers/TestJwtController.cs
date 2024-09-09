@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using WART_Api.Entity;
 using WART_Core.Controllers;
+using WART_Core.Filters;
 using WART_Core.Hubs;
 
 namespace WART_Api.Controllers
@@ -36,6 +37,7 @@ namespace WART_Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [ExcludeWart]
         public ActionResult<TestEntity> Get(int id)
         {
             var item = Items.FirstOrDefault(x => x.Id == id);
@@ -47,6 +49,7 @@ namespace WART_Api.Controllers
         }
 
         [HttpPost]
+        [GroupWart("SampleGroupName")]
         public ActionResult<TestEntity> Post([FromBody] TestEntity entity)
         {
             Items.Add(entity);
