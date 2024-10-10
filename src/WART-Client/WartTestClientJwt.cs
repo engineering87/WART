@@ -22,7 +22,7 @@ namespace WART_Client
             try
             {
                 var hubConnection = new HubConnectionBuilder()
-                    .WithUrl(wartHubUrl + "?WartGroup=SampleGroupName", options =>
+                    .WithUrl(wartHubUrl, options =>
                     {
                         options.AccessTokenProvider = () => Task.FromResult(GenerateToken(key));
                         options.Transports = HttpTransportType.WebSockets |

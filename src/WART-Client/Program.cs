@@ -17,6 +17,8 @@ namespace WART_Client
                 .Build();
 
             var wartHubUrl = $"{configuration["Scheme"]}://{configuration["Host"]}:{configuration["Port"]}/{configuration["Hubname"]}";
+            var wartHubUrlGroup = configuration["WartGroup"] != string.Empty ? $"?WartGroup={configuration["WartGroup"]}" : string.Empty;
+            wartHubUrl += wartHubUrlGroup;
 
             Console.WriteLine($"Connecting to {wartHubUrl}");
 

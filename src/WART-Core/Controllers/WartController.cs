@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -96,9 +95,12 @@ namespace WART_Core.Controllers
                     var groups = wartGroup?.GroupNames;
                     foreach (var group in groups)
                     {
+                        // send to the specific group
                         await _hubContext?.Clients
                             .Group(group)
                             .SendAsync("Send", wartEvent.ToString());
+
+                        _logger?.LogInformation($"Group: {group}, WartEvent: {wartEvent.ToString()}");
                     }
                 }
                 else
@@ -106,9 +108,9 @@ namespace WART_Core.Controllers
                     // send to all clients
                     await _hubContext?.Clients.All
                         .SendAsync("Send", wartEvent.ToString());
-                }
 
-                _logger?.LogInformation(message: nameof(WartEvent), wartEvent.ToString());
+                    _logger?.LogInformation(message: nameof(WartEvent), wartEvent.ToString());
+                }
             }
             catch (Exception ex)
             {
