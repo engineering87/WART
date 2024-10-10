@@ -17,7 +17,7 @@ namespace WART_Client
     {
         private static readonly JwtSecurityTokenHandler JwtTokenHandler = new JwtSecurityTokenHandler();
 
-        public static async void ConnectAsync(string wartHubUrl, string key)
+        public static async Task ConnectAsync(string wartHubUrl, string key)
         {
             try
             {
@@ -60,6 +60,8 @@ namespace WART_Client
             {
                 Console.WriteLine(e);
             }
+
+            await Task.CompletedTask;
         }
 
         private static string GenerateToken(string key)

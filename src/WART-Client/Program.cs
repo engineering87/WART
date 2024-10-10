@@ -1,13 +1,14 @@
 ﻿// (c) 2019 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
 namespace WART_Client
 {
     public class Program
     {
-        private static void Main()
+        private static async Task Main()
         {
             Console.WriteLine("Starting WartTestClient");
 
@@ -16,6 +17,8 @@ namespace WART_Client
                 .Build();
 
             var wartHubUrl = $"{configuration["Scheme"]}://{configuration["Host"]}:{configuration["Port"]}/{configuration["Hubname"]}";
+            var wartHubUrlGroup = configuration["WartGroup"] != string.Empty ? $"?WartGroup={configuration["WartGroup"]}" : string.Empty;
+            wartHubUrl += wartHubUrlGroup;
 
             Console.WriteLine($"Connecting to {wartHubUrl}");
 
@@ -24,11 +27,11 @@ namespace WART_Client
             if (bool.Parse(auth))
             {
                 var key = configuration["Key"];
-                WartTestClientJwt.ConnectAsync(wartHubUrl, key);
+                await WartTestClientJwt.ConnectAsync(wartHubUrl, key);
             }
             else
             {
-                WartTestClient.ConnectAsync(wartHubUrl);
+                await WartTestClient.ConnectAsync(wartHubUrl);
             }
 
             Console.WriteLine($"Connected to {wartHubUrl}");

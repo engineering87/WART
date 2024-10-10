@@ -13,7 +13,7 @@ namespace WART_Client
     /// </summary>
     public class WartTestClient
     {
-        public static async void ConnectAsync(string wartHubUrl)
+        public static async Task ConnectAsync(string wartHubUrl)
         {
             try
             {
@@ -55,6 +55,8 @@ namespace WART_Client
             {
                 Console.WriteLine(e);
             }
+
+            await Task.CompletedTask;
         }
     }
 }

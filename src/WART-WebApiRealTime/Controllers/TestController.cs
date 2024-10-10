@@ -49,6 +49,7 @@ namespace WART_Api.Controllers
         }
 
         [HttpPost]
+        [GroupWart("SampleGroupName")]
         public ActionResult<TestEntity> Post([FromBody] TestEntity entity)
         {
             Items.Add(entity);
