@@ -137,7 +137,19 @@ public ActionResult<TestEntity> Get(int id)
 ```
 
 ### SignalR Event Dispatching for Specific Groups
-WART enables sending API events to specific groups in SignalR by specifying the group name in the query string. This approach allows for flexible and targeted event broadcasting, ensuring that only the intended group of clients receives the event.
+WART enables sending API events to specific groups in SignalR by specifying the group name in the query string. This approach allows for flexible and targeted event broadcasting, ensuring that only the intended group of clients receives the event. 
+By decorating an API method with `[GroupWart("group_name")]`, it is possible to specify the SignalR group name to which the dispatch of specific events for that API is restricted. This ensures that only the clients subscribed to the specified group ("SampleGroupName") will receive the related events, allowing for targeted, group-based communication in a SignalR environment.
+
+```csharp
+[HttpPost]
+[GroupWart("SampleGroupName")]
+public ActionResult<TestEntity> Post([FromBody] TestEntity entity)
+{
+    Items.Add(entity);
+    return entity;
+}
+```
+
 By appending `?WartGroup=group_name` to the URL, the library enables dispatching events from individual APIs to a specific SignalR group, identified by `group_name`. This allows for granular control over which clients receive the event, leveraging SignalR’s built-in group functionality.
 
 ### NuGet
