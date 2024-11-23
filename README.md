@@ -10,6 +10,21 @@
 
 WART is a C# .NET library that enables you to extend any Web API controller and forward incoming calls directly to a SignalR hub. This hub then broadcasts notifications containing detailed information about the calls, including both the request and the response. Additionally, WART supports JWT authentication for secure communication with SignalR.
 
+## Features
+- Converts REST API calls into SignalR events, enabling real-time communication.
+- Provides controllers (`WartController`, `WartControllerJwt`) for automatic SignalR event broadcasting.
+- Supports JWT authentication for SignalR hub connections.
+- Allows API exclusion from event broadcasting with `[ExcludeWart]` attribute.
+- Enables group-specific event dispatching with `[GroupWart("group_name")]`.
+- Configurable middleware (`AddWartMiddleware`) for flexible integration.
+
+## Installation
+You can install the library via the NuGet package manager with the following command:
+
+```bash
+dotnet add package WART-Core
+```
+
 ### How it works
 WART implements a custom controller which overrides the `OnActionExecuting` and `OnActionExecuted` methods to retrieve the request and the response and encapsulates them in a **WartEvent** object which will be sent via SignalR on the **WartHub**.
 

@@ -60,18 +60,6 @@ namespace WART_Core.Hubs
         }
 
         /// <summary>
-        /// Broadcast the WartEvent to all clients.
-        /// </summary>
-        /// <param name="jsonWartEvent"></param>
-        /// <returns></returns>
-        //public Task Send(string jsonWartEvent)
-        //{
-        //    _logger?.LogInformation($"Send {jsonWartEvent}");
-
-        //    return Clients.All.SendAsync("Send", jsonWartEvent);
-        //}
-
-        /// <summary>
         /// Adds a connection to a group.
         /// </summary>
         /// <param name="groupName">The group name to add the connection to.</param>

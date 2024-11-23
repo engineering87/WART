@@ -1,8 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿// (c) 2024 Francesco Del Re <francesco.delre.87@gmail.com>
+// This code is licensed under MIT license (see LICENSE.txt for details)
+using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
 
 namespace WART_Core.Filters
 {
+    /// <summary>
+    /// A custom action filter attribute used to direct SignalR events to a specific SignalR group or multiple groups.
+    /// This attribute allows specifying a list of group names, which can be used to target SignalR events
+    /// to one or more SignalR groups during the execution of an action.
+    /// </summary>
     public class GroupWartAttribute : ActionFilterAttribute
     {
         public IReadOnlyList<string> GroupNames { get; }

@@ -7,6 +7,11 @@ using WART_Core.Serialization;
 
 namespace WART_Core.Entity
 {
+    /// <summary>
+    /// Represents an event in the WART system, typically capturing HTTP request and response data, 
+    /// along with additional metadata such as timestamps and remote addresses.
+    /// This class is serializable and designed to be used for logging or transmitting event data.
+    /// </summary>
     [Serializable]
     public class WartEvent
     {
@@ -23,16 +28,17 @@ namespace WART_Core.Entity
         public string ExtraInfo { get; set; }
 
         /// <summary>
-        /// Empty private constructor for JSON deserialization
+        /// Private constructor used for JSON deserialization.
+        /// This constructor is necessary for deserializing a `WartEvent` object from JSON.
         /// </summary>
         private WartEvent() { }
 
         /// <summary>
-        /// Create a new WartEvent
-        /// <param name="httpMethod"></param>
-        /// <param name="httpPath"></param>
-        /// <param name="remoteAddress"></param>
+        /// Initializes a new instance of the <see cref="WartEvent"/> class with the specified HTTP method, path, and remote address.
         /// </summary>
+        /// <param name="httpMethod">The HTTP method (e.g., GET, POST).</param>
+        /// <param name="httpPath">The path of the HTTP request.</param>
+        /// <param name="remoteAddress">The remote address (IP) from which the request originated.</param>
         public WartEvent(string httpMethod, string httpPath, string remoteAddress)
         {
             this.EventId = Guid.NewGuid();
@@ -44,13 +50,14 @@ namespace WART_Core.Entity
         }
 
         /// <summary>
-        /// Create a new WartEvent
+        /// Initializes a new instance of the <see cref="WartEvent"/> class with the specified HTTP method, path, remote address,
+        /// request payload, and response payload. This constructor is typically used when logging both the request and response data.
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="response"></param>
-        /// <param name="httpMethod"></param>
-        /// <param name="httpPath"></param>
-        /// <param name="remoteAddress"></param>
+        /// <param name="request">The request object to be serialized into JSON format.</param>
+        /// <param name="response">The response object to be serialized into JSON format.</param>
+        /// <param name="httpMethod">The HTTP method (e.g., GET, POST).</param>
+        /// <param name="httpPath">The path of the HTTP request.</param>
+        /// <param name="remoteAddress">The remote address (IP) from which the request originated.</param>
         public WartEvent(object request, object response, string httpMethod, string httpPath, string remoteAddress)
         {
             this.EventId = Guid.NewGuid();
@@ -64,29 +71,32 @@ namespace WART_Core.Entity
         }
 
         /// <summary>
-        /// Return the JSON serialization
+        /// Returns the string representation of the <see cref="WartEvent"/> object as a JSON string.
+        /// The entire event is serialized to JSON using the <see cref="SerializationHelper"/>.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A JSON string representation of the <see cref="WartEvent"/>.</returns>
         public override string ToString()
         {
             return SerializationHelper.Serialize(this);
         }
 
         /// <summary>
-        /// Deserialize the JSON request
+        /// Deserializes the request payload (JSON) into an object of the specified type.
+        /// This method is useful for retrieving the original request object from the stored payload.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">The type to which the request payload will be deserialized.</typeparam>
+        /// <returns>The deserialized object of type <typeparamref name="T"/>.</returns>
         public T GetRequestObject<T>() where T : class
         {
             return SerializationHelper.Deserialize<T>(JsonRequestPayload);
         }
 
         /// <summary>
-        /// Deserialize the JSON response
+        /// Deserializes the response payload (JSON) into an object of the specified type.
+        /// This method is useful for retrieving the original response object from the stored payload.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">The type to which the response payload will be deserialized.</typeparam>
+        /// <returns>The deserialized object of type <typeparamref name="T"/>.</returns>
         public T GetResponseObject<T>() where T : class
         {
             return SerializationHelper.Deserialize<T>(JsonResponsePayload);

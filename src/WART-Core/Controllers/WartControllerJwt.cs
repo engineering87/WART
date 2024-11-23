@@ -99,7 +99,7 @@ namespace WART_Core.Controllers
                             .Group(group)
                             .SendAsync("Send", wartEvent.ToString());
 
-                        _logger?.LogInformation($"Group: {group}, WartEvent: {wartEvent.ToString()}");
+                        _logger?.LogInformation($"Group: {group}, WartEvent: {wartEvent}");
                     }
                 }
                 else
@@ -108,7 +108,7 @@ namespace WART_Core.Controllers
                     await _hubContext?.Clients.All
                         .SendAsync("Send", wartEvent.ToString());
 
-                    _logger?.LogInformation(message: nameof(WartEvent), wartEvent.ToString());
+                    _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}", nameof(WartEvent), wartEvent.ToString());
                 }
             }
             catch (Exception ex)

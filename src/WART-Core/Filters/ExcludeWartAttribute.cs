@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace WART_Core.Filters
 {
     /// <summary>
-    /// Exclude the API from WART events.
+    /// A custom action filter that prevents the propagation of any SignalR events related to the action.
+    /// When applied to an action, this filter ensures that no SignalR events are triggered or broadcasted
+    /// as a result of the execution of the action.
     /// </summary>
     public class ExcludeWartAttribute : ActionFilterAttribute
     {

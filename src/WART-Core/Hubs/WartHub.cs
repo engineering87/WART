@@ -57,24 +57,6 @@ namespace WART_Core.Hubs
         }
 
         /// <summary>
-        /// Broadcast the WartEvent to all clients.
-        /// </summary>
-        /// <param name="jsonWartEvent"></param>
-        /// <returns></returns>
-        //public Task Send(string jsonWartEvent)
-        //{
-        //    if (string.IsNullOrWhiteSpace(jsonWartEvent))
-        //    {
-        //        _logger?.LogWarning("Attempted to send empty or null WartEvent.");
-        //        return Task.CompletedTask;
-        //    }
-
-        //    _logger?.LogInformation($"Send {jsonWartEvent}");
-
-        //    return Clients.All.SendAsync("Send", jsonWartEvent);
-        //}
-
-        /// <summary>
         /// Adds a connection to a group.
         /// </summary>
         /// <param name="groupName">The group name to add the connection to.</param>
@@ -109,25 +91,6 @@ namespace WART_Core.Hubs
             
             _logger?.LogInformation($"Connection {Context.ConnectionId} removed from group {groupName}");
         }
-
-        /// <summary>
-        /// Send a message to a specific group.
-        /// </summary>
-        /// <param name="groupName">The group name to send the message to.</param>
-        /// <param name="jsonWartEvent">The JSON formatted WartEvent</param>
-        /// <returns></returns>
-        //public Task SendToGroup(string groupName, string jsonWartEvent)
-        //{
-        //    if (string.IsNullOrWhiteSpace(groupName) || string.IsNullOrWhiteSpace(jsonWartEvent))
-        //    {
-        //        _logger?.LogWarning("Attempted to send to a null or empty group or send a null or empty WartEvent.");
-        //        return Task.CompletedTask;
-        //    }
-
-        //    _logger?.LogInformation($"Sending WartEvent to group {groupName}: {jsonWartEvent}");
-            
-        //    return Clients.Group(groupName).SendAsync("Send", jsonWartEvent);
-        //}
 
         /// <summary>
         /// Get the current number of active connection

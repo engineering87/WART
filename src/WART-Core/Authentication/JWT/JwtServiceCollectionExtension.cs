@@ -17,29 +17,36 @@ namespace WART_Core.Authentication.JWT
     public static class JwtServiceCollectionExtension
     {
         /// <summary>
-        /// Add JWT authentication dependency.
+        /// Adds JWT authentication middleware to the service collection.
+        /// Configures the authentication parameters, SignalR settings, and response compression.
         /// </summary>
-        /// <param name="services"></param>
-        /// <param name="tokenKey"></param>
-        /// <returns></returns>
+        /// <param name="services">The service collection to add the middleware to.</param>
+        /// <param name="tokenKey">The secret key used to sign and validate the JWT tokens.</param>
+        /// <returns>The updated service collection.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the token key is null or empty.</exception>
         public static IServiceCollection AddJwtMiddleware(this IServiceCollection services, string tokenKey)
         {
+            // Validate that the token key is provided
             if (string.IsNullOrEmpty(tokenKey))
             {
                 throw new ArgumentNullException("Invalid token key");
             }
 
+            // Configure forwarded headers (to support proxy scenarios, e.g., when behind a load balancer)
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
 
+            // Add logging for debugging purposes
             services.AddLogging(configure => configure.AddConsole());
 
+            // Create a symmetric security key from the provided token key
             var key = Encoding.UTF8.GetBytes(tokenKey);
             var securityKey = new SymmetricSecurityKey(key);
 
+            // Configure authentication using JWT Bearer token
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -72,6 +79,7 @@ namespace WART_Core.Authentication.JWT
                 };
             });
 
+            // Configure SignalR options, including error handling and timeouts
             services.AddSignalR(options =>
             {
                 options.EnableDetailedErrors = true;
@@ -80,6 +88,7 @@ namespace WART_Core.Authentication.JWT
                 options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
             });
 
+            // Configure response compression to support additional MIME types
             services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
