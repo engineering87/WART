@@ -15,11 +15,11 @@ namespace WART_Core.Middleware
         private const string DefaultHubName = "warthub";
 
         /// <summary>
-        /// Use WART dependency to IApplicationBuilder.
-        /// The default SignalR hub name is warthub.
+        /// Configures and adds the WART middleware to the IApplicationBuilder.
+        /// This method sets up the default SignalR hub (warthub) without authentication.
         /// </summary>
-        /// <param name="app"></param>
-        /// <returns></returns>
+        /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
+        /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app)
         {
             app.UseRouting();
@@ -36,12 +36,13 @@ namespace WART_Core.Middleware
         }
 
         /// <summary>
-        /// Use WART dependency to IApplicationBuilder.
-        /// The default SignalR hub name is warthub.
+        /// Configures and adds the WART middleware to the IApplicationBuilder
+        /// with a specified SignalR hub type. If the hub type requires authentication,
+        /// JWT middleware will be included for secure access to the hub.
         /// </summary>
-        /// <param name="app">The IApplicationBuilder</param>
-        /// <param name="hubType">The SignalR hub type</param>
-        /// <returns></returns>
+        /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
+        /// <param name="hubType">The type of SignalR hub to configure, determining if authentication is required.</param>
+        /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, HubType hubType)
         {
             app.UseRouting();
@@ -70,11 +71,13 @@ namespace WART_Core.Middleware
         }
 
         /// <summary>
-        /// Use WART dependency to IApplicationBuilder.
+        /// Configures and adds the WART middleware to the IApplicationBuilder
+        /// with a custom SignalR hub name.
         /// </summary>
-        /// <param name="app">The IApplicationBuilder</param>
-        /// <param name="hubName">The SignalR hub name</param>
-        /// <returns></returns>
+        /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
+        /// <param name="hubName">The custom SignalR hub name (URL path).</param>
+        /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the hub name is null or empty.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, string hubName)
         {
             if (string.IsNullOrEmpty(hubName))
@@ -94,16 +97,17 @@ namespace WART_Core.Middleware
         }
 
         /// <summary>
-        /// Use WART dependency to IApplicationBuilder.
+        /// Configures and adds the WART middleware to the IApplicationBuilder
+        /// with a list of SignalR hub names. This allows configuring multiple hubs
+        /// at once by passing a list of custom names.
         /// </summary>
-        /// <param name="app">The IApplicationBuilder</param>
-        /// <param name="hubNameList">The SignalR hub name list</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
+        /// <param name="hubNameList">The list of custom SignalR hub names (URL paths).</param>
+        /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the hub name list is null.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, IEnumerable<string> hubNameList)
         {
-            if (hubNameList == null)
-                throw new ArgumentNullException("Invalid hub list");
+            ArgumentNullException.ThrowIfNull(hubNameList);
 
             app.UseRouting();
 
@@ -122,12 +126,14 @@ namespace WART_Core.Middleware
         }
 
         /// <summary>
-        /// Use WART dependency to IApplicationBuilder.
+        /// Configures and adds the WART middleware to the IApplicationBuilder
+        /// with a custom SignalR hub name and hub type (with or without authentication).
         /// </summary>
-        /// <param name="app">The IApplicationBuilder</param>
-        /// <param name="hubName">The SignalR hub name</param>
-        /// <param name="hubType">The SignalR hub type</param>
-        /// <returns></returns>
+        /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
+        /// <param name="hubName">The custom SignalR hub name (URL path).</param>
+        /// <param name="hubType">The type of SignalR hub to configure, determining if authentication is required.</param>
+        /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the hub name is null or empty.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, string hubName, HubType hubType)
         {
             if (string.IsNullOrEmpty(hubName))
@@ -159,17 +165,19 @@ namespace WART_Core.Middleware
         }
 
         /// <summary>
-        /// Use WART dependency to IApplicationBuilder.
+        /// Configures and adds the WART middleware to the IApplicationBuilder
+        /// with a list of custom SignalR hub names and a specified hub type
+        /// (with or without authentication). This allows for multiple hubs
+        /// with different authentication requirements to be configured.
         /// </summary>
-        /// <param name="app">The IApplicationBuilder</param>
-        /// <param name="hubNameList">The SignalR hub name list</param>
-        /// <param name="hubType">The SignalR hub type</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
+        /// <param name="hubNameList">The list of custom SignalR hub names (URL paths).</param>
+        /// <param name="hubType">The type of SignalR hub to configure, determining if authentication is required.</param>
+        /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the hub name list is null.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, IEnumerable<string> hubNameList, HubType hubType)
         {
-            if (hubNameList == null)
-                throw new ArgumentNullException("Invalid hub list");
+            ArgumentNullException.ThrowIfNull(hubNameList);
 
             app.UseRouting();
 

@@ -9,7 +9,7 @@ namespace WART_Core.Authentication.JWT
         /// <summary>
         /// Use JWT authentication dependency to IApplicationBuilder.
         /// </summary>
-        /// <param name="app"></param>
+        /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
         /// <returns></returns>
         public static IApplicationBuilder UseJwtMiddleware(this IApplicationBuilder app)
         {

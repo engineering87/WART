@@ -40,7 +40,7 @@ namespace WART_Tests.Middleware
             // Assert
             var serviceProvider = services.BuildServiceProvider();
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger("TestLogger");
+            var logger = loggerFactory?.CreateLogger("TestLogger");
             Assert.NotNull(logger);
         }
 
