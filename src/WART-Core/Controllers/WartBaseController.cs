@@ -68,28 +68,90 @@ namespace WART_Core.Controllers
         {
             try
             {
-                if (filters.Any(f => f.GetType().Name == nameof(GroupWartAttribute)))
+                // Retrieve the target groups based on the filters.
+                var groups = GetTargetGroups(filters);
+
+                // If there are groups specified, send the event to each group in parallel.
+                if (groups.Any())
                 {
-                    var wartGroup = filters.OfType<GroupWartAttribute>().FirstOrDefault();
-                    var groups = wartGroup?.GroupNames;
-                    if (groups != null)
-                    {
-                        foreach (var group in groups)
-                        {
-                            await _hubContext.Clients.Group(group).SendAsync("Send", wartEvent.ToString());
-                            _logger?.LogInformation($"Group: {group}, WartEvent: {wartEvent}");
-                        }
-                    }
+                    // Sending events to multiple groups in parallel.
+                    var tasks = groups.Select(group => SendEventToGroup(wartEvent, group));
+                    await Task.WhenAll(tasks);
                 }
                 else
                 {
-                    await _hubContext.Clients.All.SendAsync("Send", wartEvent.ToString());
-                    _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}", nameof(WartEvent), wartEvent.ToString());
+                    // If no specific groups are defined, send the event to all connected clients.
+                    await SendEventToAllClients(wartEvent);
                 }
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error sending WartEvent to clients");
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the list of groups that the WartEvent should be sent to, based on the provided filters.
+        /// </summary>
+        /// <param name="filters">The list of filters that may contain group-related information.</param>
+        /// <returns>A list of group names to send the WartEvent to.</returns>
+        private IEnumerable<string> GetTargetGroups(List<IFilterMetadata> filters)
+        {
+            var groups = new List<string>();
+
+            // Check if there is a GroupWartAttribute filter indicating groups.
+            if (filters.Any(f => f.GetType().Name == nameof(GroupWartAttribute)))
+            {
+                var wartGroup = filters.FirstOrDefault(f => f.GetType() == typeof(GroupWartAttribute)) as GroupWartAttribute;
+                if (wartGroup != null)
+                {
+                    groups.AddRange(wartGroup.GroupNames);
+                }
+            }
+
+            return groups;
+        }
+
+        /// <summary>
+        /// Sends the WartEvent to a specific group of clients.
+        /// </summary>
+        /// <param name="wartEvent">The WartEvent to send to the group.</param>
+        /// <param name="group">The group name to which the event will be sent.</param>
+        /// <returns>A Task representing the asynchronous operation.</returns>
+        private async Task SendEventToGroup(WartEvent wartEvent, string group)
+        {
+            try
+            {
+                await _hubContext?.Clients
+                    .Group(group)
+                    .SendAsync("Send", wartEvent.ToString());
+
+                _logger?.LogInformation($"Group: {group}, WartEvent: {wartEvent}");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, $"Error sending WartEvent to group {group}");
+            }
+        }
+
+        /// <summary>
+        /// Sends the WartEvent to all connected clients.
+        /// </summary>
+        /// <param name="wartEvent">The WartEvent to send to all clients.</param>
+        /// <returns>A Task representing the asynchronous operation.</returns>
+        private async Task SendEventToAllClients(WartEvent wartEvent)
+        {
+            try
+            {
+                // Send the WartEvent to all connected clients using SignalR.
+                await _hubContext?.Clients.All
+                    .SendAsync("Send", wartEvent.ToString());
+
+                _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}", nameof(WartEvent), wartEvent.ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error sending WartEvent to all clients");
             }
         }
     }
