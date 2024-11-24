@@ -6,7 +6,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Francesco Del Re</Authors>
     <Company>Francesco Del Re</Company>
-    <Description>WART is a C# .NET Core library that allows extending any WebApi controller and forwarding any calls received by the controller to a SignalR hub</Description>
+    <Description>Transforms REST APIs into SignalR events, bringing real-time interaction to your applications</Description>
     <Copyright>MIT</Copyright>
     <PackageProjectUrl>https://github.com/engineering87/WART</PackageProjectUrl>
     <RepositoryUrl>https://github.com/engineering87/WART</RepositoryUrl>
@@ -14,7 +14,7 @@
     <PackageLicenseExpression></PackageLicenseExpression>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <FileVersion>4.0.0.0</FileVersion>
-    <Version>5.3.3</Version>
+    <Version>5.3.4</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
