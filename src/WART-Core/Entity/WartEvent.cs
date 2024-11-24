@@ -1,6 +1,7 @@
 ﻿// (c) 2019 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using WART_Core.Helpers;
 using WART_Core.Serialization;
@@ -101,5 +102,25 @@ namespace WART_Core.Entity
         {
             return SerializationHelper.Deserialize<T>(JsonResponsePayload);
         }
-    }    
+
+        /// <summary>
+        /// Converts the WartEvent instance into a dictionary for flexible logging or data analysis.
+        /// </summary>
+        /// <returns>A dictionary representation of the event.</returns>
+        public Dictionary<string, object> ToDictionary()
+        {
+            return new Dictionary<string, object>
+            {
+                { "EventId", EventId },
+                { "TimeStamp", TimeStamp },
+                { "UtcTimeStamp", UtcTimeStamp },
+                { "HttpMethod", HttpMethod },
+                { "HttpPath", HttpPath },
+                { "RemoteAddress", RemoteAddress },
+                { "JsonRequestPayload", JsonRequestPayload },
+                { "JsonResponsePayload", JsonResponsePayload },
+                { "ExtraInfo", ExtraInfo }
+            };
+        }
+    }
 }
