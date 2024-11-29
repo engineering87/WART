@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
+using WART_Core.Hubs;
+using WART_Core.Services;
 
 namespace WART_Core.Authentication.JWT
 {
@@ -78,6 +80,12 @@ namespace WART_Core.Authentication.JWT
                     }
                 };
             });
+
+            // Register WART event queue as a singleton service.
+            services.AddSingleton<WartEventQueueService>();
+
+            // Register the WART event worker as a hosted service.
+            services.AddHostedService<WartEventWorker<WartHubJwt>>();
 
             // Configure SignalR options, including error handling and timeouts
             services.AddSignalR(options =>
