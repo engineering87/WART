@@ -46,8 +46,7 @@ namespace WART_Core.Services
             {
                 // Check if there are any connected clients.
                 if (!WartHubBase.HasConnectedClients)
-                {
-                    _logger.LogInformation("No clients connected. Pausing event processing.");
+                {                    
                     await Task.Delay(500, stoppingToken);
                     continue;
                 }
@@ -96,7 +95,7 @@ namespace WART_Core.Services
                 var groups = GetTargetGroups(filters);
 
                 // If specific groups are defined, send the event to each group in parallel.
-                if (groups.Any())
+                if (groups.Count != 0)
                 {
                     var tasks = groups.Select(group => SendEventToGroup(wartEvent, group));
                     await Task.WhenAll(tasks);

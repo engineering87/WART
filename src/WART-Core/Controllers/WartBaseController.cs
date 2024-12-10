@@ -54,21 +54,8 @@ namespace WART_Core.Controllers
 
                     var wartEvent = new WartEvent(request, response, httpMethod, httpPath, remoteAddress);
 
-                    // Fire-and-forget
-                    //Task.Run(() => SendToHub(wartEvent, [.. context.Filters]))
-                    //    .ContinueWith(task =>
-                    //    {
-                    //        if (task.IsFaulted)
-                    //        {
-                    //            _logger?.LogError(task.Exception, "Error sending WartEvent.");
-                    //        }
-                    //    });
-
                     _eventQueue = context.HttpContext?.RequestServices.GetService<WartEventQueueService>();
-                    if (_eventQueue != null)
-                    {
-                        _eventQueue.Enqueue(new WartEventWithFilters(wartEvent, [.. context.Filters]));
-                    }
+                    _eventQueue?.Enqueue(new WartEventWithFilters(wartEvent, [.. context.Filters]));
                 }
             }
 

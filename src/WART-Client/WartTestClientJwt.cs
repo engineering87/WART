@@ -58,7 +58,7 @@ namespace WART_Client
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.Message);
             }
 
             await Task.CompletedTask;
