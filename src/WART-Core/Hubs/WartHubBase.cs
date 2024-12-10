@@ -122,5 +122,10 @@ namespace WART_Core.Hubs
         {
             return _connections.Count;
         }
+
+        /// <summary>
+        /// Returns a value indicating whether there are connected clients.
+        /// </summary>
+        public static bool HasConnectedClients => !_connections.IsEmpty;
     }
 }
