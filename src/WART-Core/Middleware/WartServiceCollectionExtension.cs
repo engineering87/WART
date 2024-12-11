@@ -9,6 +9,8 @@ using System;
 using System.Linq;
 using WART_Core.Authentication.JWT;
 using WART_Core.Enum;
+using WART_Core.Hubs;
+using WART_Core.Services;
 
 namespace WART_Core.Middleware
 {
@@ -31,6 +33,12 @@ namespace WART_Core.Middleware
 
             // Add console logging.
             services.AddLogging(configure => configure.AddConsole());
+
+            // Register WART event queue as a singleton service.
+            services.AddSingleton<WartEventQueueService>();
+
+            // Register the WART event worker as a hosted service.
+            services.AddHostedService<WartEventWorker<WartHub>>();
 
             // Configure SignalR with custom options.
             services.AddSignalR(options =>

@@ -4,12 +4,11 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using WART_Core.Entity;
 using WART_Core.Filters;
+using Microsoft.Extensions.DependencyInjection;
+using WART_Core.Services;
 
 namespace WART_Core.Controllers
 {
@@ -18,6 +17,8 @@ namespace WART_Core.Controllers
         private readonly ILogger _logger;
         private readonly IHubContext<THub> _hubContext;
         private const string RouteDataKey = "REQUEST";
+
+        private WartEventQueueService _eventQueue;
 
         protected WartBaseController(IHubContext<THub> hubContext, ILogger logger)
         {
@@ -39,7 +40,7 @@ namespace WART_Core.Controllers
         /// Processes the executed action and sends the event to the SignalR hub if applicable.
         /// </summary>
         /// <param name="context">The action executed context.</param>
-        public override async void OnActionExecuted(ActionExecutedContext context)
+        public override void OnActionExecuted(ActionExecutedContext context)
         {
             if (context?.Result is ObjectResult objectResult)
             {
@@ -52,45 +53,13 @@ namespace WART_Core.Controllers
                     var response = objectResult.Value;
 
                     var wartEvent = new WartEvent(request, response, httpMethod, httpPath, remoteAddress);
-                    await SendToHub(wartEvent, [.. context.Filters]);
+
+                    _eventQueue = context.HttpContext?.RequestServices.GetService<WartEventQueueService>();
+                    _eventQueue?.Enqueue(new WartEventWithFilters(wartEvent, [.. context.Filters]));
                 }
             }
 
             base.OnActionExecuted(context);
-        }
-
-        /// <summary>
-        /// Sends the current event to the SignalR hub.
-        /// </summary>
-        /// <param name="wartEvent">The current WartEvent.</param>
-        /// <param name="filters">The list of filters applied to the request.</param>
-        private async Task SendToHub(WartEvent wartEvent, List<IFilterMetadata> filters)
-        {
-            try
-            {
-                if (filters.Any(f => f.GetType().Name == nameof(GroupWartAttribute)))
-                {
-                    var wartGroup = filters.OfType<GroupWartAttribute>().FirstOrDefault();
-                    var groups = wartGroup?.GroupNames;
-                    if (groups != null)
-                    {
-                        foreach (var group in groups)
-                        {
-                            await _hubContext.Clients.Group(group).SendAsync("Send", wartEvent.ToString());
-                            _logger?.LogInformation($"Group: {group}, WartEvent: {wartEvent}");
-                        }
-                    }
-                }
-                else
-                {
-                    await _hubContext.Clients.All.SendAsync("Send", wartEvent.ToString());
-                    _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}", nameof(WartEvent), wartEvent.ToString());
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Error sending WartEvent to clients");
-            }
         }
     }
 }
