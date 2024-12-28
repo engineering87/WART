@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>WART_Api</RootNamespace>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 	<IsPackable>false</IsPackable>
