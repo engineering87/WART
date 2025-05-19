@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using WART_Core.Authentication.Cookie;
 using WART_Core.Authentication.JWT;
 using WART_Core.Enum;
 using WART_Core.Hubs;
@@ -70,15 +71,27 @@ namespace WART_Core.Middleware
         public static IServiceCollection AddWartMiddleware(this IServiceCollection services, HubType hubType, string tokenKey = "")
         {
             // Check the hub type to determine if authentication is required.
-            if (hubType == HubType.NoAuthentication)
+            switch(hubType)
             {
-                // If no authentication is required, configure WART middleware without authentication.
-                services.AddWartMiddleware();
-            }
-            else
-            {
-                // If authentication is required, configure JWT middleware for authentication.
-                services.AddJwtMiddleware(tokenKey);
+                default:
+                case HubType.NoAuthentication:
+                    {
+                        // If no authentication is required, configure WART middleware without authentication.
+                        services.AddWartMiddleware();
+                        break;
+                    }
+                case HubType.JwtAuthentication:
+                    {
+                        // If authentication is required, configure JWT middleware for authentication.
+                        services.AddJwtMiddleware(tokenKey);
+                        break;
+                    }
+                case HubType.CookieAuthentication:
+                    {
+                        // If authentication is required, configure Cookie middleware for authentication.
+                        services.AddCookieMiddleware();
+                        break;
+                    }
             }
 
             return services;
