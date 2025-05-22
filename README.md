@@ -12,7 +12,7 @@ WART is a C# .NET library that enables you to extend any Web API controller and 
 
 ## Features
 - Converts REST API calls into SignalR events, enabling real-time communication.
-- Provides controllers (`WartController`, `WartControllerJwt`) for automatic SignalR event broadcasting.
+- Provides controllers (`WartController`, `WartControllerJwt`, `WartControllerCookie`) for automatic SignalR event broadcasting.
 - Supports JWT authentication for SignalR hub connections.
 - Allows API exclusion from event broadcasting with `[ExcludeWart]` attribute.
 - Enables group-specific event dispatching with `[GroupWart("group_name")]`.
@@ -133,6 +133,18 @@ hubConnection.On<string>("Send", (data) =>
 ```
 
 In the source code you can find a simple test client and WebApi project.
+
+## Supported Authentication Modes
+
+The project supports three authentication modes for accessing the SignalR Hub:
+
+| Mode                     | Description                                                               | Hub Class           | Required Middleware      |
+|--------------------------|---------------------------------------------------------------------------|----------------------|---------------------------|
+| **No Authentication**    | Open access without identity verification                                 | `WartHub`            | None                      |
+| **JWT (Bearer Token)**   | Authentication via JWT token in the `Authorization: Bearer <token>` header | `WartHubJwt`         | `UseJwtMiddleware()`      |
+| **Cookie Authentication**| Authentication via HTTP cookies issued after login                        | `WartHubCookie`      | `UseCookieMiddleware()`   |
+
+> ⚙️ Authentication mode is selected through the `HubType` configuration in the application startup.
 
 ### Excluding APIs from Event Propagation
 There might be scenarios where you want to exclude specific APIs from propagating events to connected clients. This can be particularly useful when certain endpoints should not trigger updates, notifications, or other real-time messages through SignalR. To achieve this, you can use a custom filter called `ExcludeWartAttribute`. By decorating the desired API endpoints with this attribute, you can prevent them from being included in the SignalR event propagation logic, for example:

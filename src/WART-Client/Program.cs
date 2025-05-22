@@ -22,16 +22,27 @@ namespace WART_Client
 
             Console.WriteLine($"Connecting to {wartHubUrl}");
 
-            var auth = configuration["AuthenticationJwt"];
+            var auth = configuration["AuthenticationType"] ?? "NoAuth";
 
-            if (bool.Parse(auth))
+            switch (auth.ToLowerInvariant())
             {
-                var key = configuration["Key"];
-                await WartTestClientJwt.ConnectAsync(wartHubUrl, key);
-            }
-            else
-            {
-                await WartTestClient.ConnectAsync(wartHubUrl);
+                default:
+                case "noauth":
+                    {
+                        await WartTestClient.ConnectAsync(wartHubUrl);
+                        break;
+                    }
+                case "jwt":
+                    {
+                        var key = configuration["Key"];
+                        await WartTestClientJwt.ConnectAsync(wartHubUrl, key);
+                        break;
+                    }
+                case "cookie":
+                    {
+                        await WartTestClientCookie.ConnectAsync(wartHubUrl);
+                        break;
+                    }
             }
 
             Console.WriteLine($"Connected to {wartHubUrl}");

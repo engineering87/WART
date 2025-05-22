@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WART_Core.Authentication.Cookie;
 using WART_Core.Authentication.JWT;
 using WART_Core.Enum;
 using WART_Core.Hubs;
@@ -47,22 +48,38 @@ namespace WART_Core.Middleware
         {
             app.UseRouting();
 
-            if (hubType == HubType.NoAuthentication)
+            switch(hubType)
             {
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                    endpoints.MapHub<WartHub>($"/{DefaultHubName}");
-                });
-            }
-            else
-            {
-                app.UseJwtMiddleware();
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                    endpoints.MapHub<WartHubJwt>($"/{DefaultHubName}");
-                });
+                default:
+                case HubType.NoAuthentication:
+                    {
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapControllers();
+                            endpoints.MapHub<WartHub>($"/{DefaultHubName}");
+                        });
+                        break;
+                    }
+                case HubType.JwtAuthentication:
+                    {
+                        app.UseJwtMiddleware();
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapControllers();
+                            endpoints.MapHub<WartHubJwt>($"/{DefaultHubName}");
+                        });
+                        break;
+                    }
+                case HubType.CookieAuthentication:
+                    {
+                        app.UseCookieMiddleware();
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapControllers();
+                            endpoints.MapHub<WartHubCookie>($"/{DefaultHubName}");
+                        });
+                        break;
+                    }
             }
 
             app.UseForwardedHeaders();
@@ -141,22 +158,38 @@ namespace WART_Core.Middleware
 
             app.UseRouting();
 
-            if (hubType == HubType.NoAuthentication)
+            switch (hubType)
             {
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                    endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
-                });
-            }
-            else
-            {
-                app.UseJwtMiddleware();
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                    endpoints.MapHub<WartHubJwt>($"/{hubName.Trim()}");
-                });
+                default:
+                case HubType.NoAuthentication:
+                    {
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapControllers();
+                            endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
+                        });
+                        break;
+                    }
+                case HubType.JwtAuthentication:
+                    {
+                        app.UseJwtMiddleware();
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapControllers();
+                            endpoints.MapHub<WartHubJwt>($"/{hubName.Trim()}");
+                        });
+                        break;
+                    }
+                case HubType.CookieAuthentication:
+                    {
+                        app.UseCookieMiddleware();
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapControllers();
+                            endpoints.MapHub<WartHubCookie>($"/{hubName.Trim()}");
+                        });
+                        break;
+                    }
             }
 
             app.UseForwardedHeaders();
@@ -183,22 +216,38 @@ namespace WART_Core.Middleware
 
             foreach (var hubName in hubNameList.Distinct())
             {
-                if (hubType == HubType.NoAuthentication)
+                switch (hubType)
                 {
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapControllers();
-                        endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
-                    });
-                }
-                else
-                {
-                    app.UseJwtMiddleware();
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapControllers();
-                        endpoints.MapHub<WartHubJwt>($"/{hubName.Trim()}");
-                    });
+                    default:
+                    case HubType.NoAuthentication:
+                        {
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapControllers();
+                                endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
+                            });
+                            break;
+                        }
+                    case HubType.JwtAuthentication:
+                        {
+                            app.UseJwtMiddleware();
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapControllers();
+                                endpoints.MapHub<WartHubJwt>($"/{hubName.Trim()}");
+                            });
+                            break;
+                        }
+                    case HubType.CookieAuthentication:
+                        {
+                            app.UseCookieMiddleware();
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapControllers();
+                                endpoints.MapHub<WartHubCookie>($"/{hubName.Trim()}");
+                            });
+                            break;
+                        }
                 }
             }
 

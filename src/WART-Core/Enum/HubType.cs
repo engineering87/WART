@@ -11,9 +11,15 @@ namespace WART_Core.Enum
         /// Simple SignalR hub without authentication
         /// </summary>
         NoAuthentication,
+
         /// <summary>
         /// SignalR hub with JWT authentication
         /// </summary>
-        JwtAuthentication
+        JwtAuthentication,
+
+        /// <summary>
+        /// SignalR hub with Cookie authentication
+        /// </summary>
+        CookieAuthentication
     }
 }
