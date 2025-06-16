@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using WART_Core.Utilities;
 
 namespace WART_Core.Hubs
 {
@@ -51,7 +52,7 @@ namespace WART_Core.Hubs
                 await AddToGroup(wartGroup);
             }
 
-            _logger?.LogInformation("OnConnect: ConnectionId={ConnectionId}, User={UserName}", Context.ConnectionId, userName);
+            _logger?.LogInformation("OnConnect: ConnectionId={ConnectionId}, User={UserName}", Context.ConnectionId, LogSanitizer.Sanitize(userName));
 
             await base.OnConnectedAsync();
         }
@@ -93,7 +94,7 @@ namespace WART_Core.Hubs
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
-            _logger?.LogInformation("Connection {ConnectionId} added to group {GroupName}", Context.ConnectionId, groupName);
+            _logger?.LogInformation("Connection {ConnectionId} added to group {GroupName}", Context.ConnectionId, LogSanitizer.Sanitize(groupName));
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace WART_Core.Hubs
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 
-            _logger?.LogInformation("Connection {ConnectionId} removed from group {GroupName}", Context.ConnectionId, groupName);
+            _logger?.LogInformation("Connection {ConnectionId} removed from group {GroupName}", Context.ConnectionId, LogSanitizer.Sanitize(groupName));
         }
 
         /// <summary>
