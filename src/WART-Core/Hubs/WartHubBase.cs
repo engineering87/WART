@@ -51,7 +51,7 @@ namespace WART_Core.Hubs
                 await AddToGroup(wartGroup);
             }
 
-            _logger?.LogInformation($"OnConnect: ConnectionId={Context.ConnectionId}, User={userName}");
+            _logger?.LogInformation("OnConnect: ConnectionId={ConnectionId}, User={UserName}", Context.ConnectionId, userName);
 
             await base.OnConnectedAsync();
         }
@@ -68,11 +68,11 @@ namespace WART_Core.Hubs
 
             if (exception != null)
             {
-                _logger?.LogWarning(exception, $"OnDisconnect with error: ConnectionId={Context.ConnectionId}");
+                _logger?.LogWarning(exception, "OnDisconnect with error: ConnectionId={ConnectionId}", Context.ConnectionId);
             }
             else
             {
-                _logger?.LogInformation($"OnDisconnect: ConnectionId={Context.ConnectionId}");
+                _logger?.LogInformation("OnDisconnect: ConnectionId={ConnectionId}", Context.ConnectionId);
             }
 
             return base.OnDisconnectedAsync(exception);
@@ -93,7 +93,7 @@ namespace WART_Core.Hubs
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
-            _logger?.LogInformation($"Connection {Context.ConnectionId} added to group {groupName}");
+            _logger?.LogInformation("Connection {ConnectionId} added to group {GroupName}", Context.ConnectionId, groupName);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace WART_Core.Hubs
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 
-            _logger?.LogInformation($"Connection {Context.ConnectionId} removed from group {groupName}");
+            _logger?.LogInformation("Connection {ConnectionId} removed from group {GroupName}", Context.ConnectionId, groupName);
         }
 
         /// <summary>
