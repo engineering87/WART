@@ -33,10 +33,10 @@ namespace WART_Api
             //services.AddWartMiddleware();
 
             // with JWT authentication
-            //services.AddWartMiddleware(hubType: HubType.JwtAuthentication, tokenKey: "dn3341fmcscscwe28419brhwbwgbss4t");
+            services.AddWartMiddleware(hubType: HubType.JwtAuthentication, tokenKey: "dn3341fmcscscwe28419brhwbwgbss4t");
 
             // with Cookie authentication
-            services.AddWartMiddleware(hubType: HubType.CookieAuthentication);
+            //services.AddWartMiddleware(hubType: HubType.CookieAuthentication);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -75,10 +75,10 @@ namespace WART_Api
             //app.UseWartMiddleware();
 
             // with JWT authentication
-            //app.UseWartMiddleware(HubType.JwtAuthentication);
+            app.UseWartMiddleware(HubType.JwtAuthentication);
 
             // with Cookie authentication
-            app.UseWartMiddleware(HubType.CookieAuthentication);
+            //app.UseWartMiddleware(HubType.CookieAuthentication);
 
             // multiple hub with authentication
             //var hubNameList = new List<string>
