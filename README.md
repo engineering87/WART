@@ -5,6 +5,7 @@
 ![NuGet Downloads](https://img.shields.io/nuget/dt/WART-Core)
 [![issues - wart](https://img.shields.io/github/issues/engineering87/WART)](https://github.com/engineering87/WART/issues)
 [![stars - wart](https://img.shields.io/github/stars/engineering87/WART?style=social)](https://github.com/engineering87/WART)
+[![Sponsor me](https://img.shields.io/badge/Sponsor-❤-pink)](https://github.com/sponsors/engineering87)
 
 <img src="https://github.com/engineering87/WART/blob/develop/wart_logo.jpg" width="300">
 
