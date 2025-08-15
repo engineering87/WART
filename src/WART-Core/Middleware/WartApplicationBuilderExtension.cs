@@ -27,6 +27,7 @@ namespace WART_Core.Middleware
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app)
         {
             app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
@@ -49,6 +50,7 @@ namespace WART_Core.Middleware
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, HubType hubType)
         {
             app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             switch(hubType)
@@ -102,6 +104,7 @@ namespace WART_Core.Middleware
                 throw new ArgumentException("Invalid hub name");
 
             app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
@@ -127,6 +130,7 @@ namespace WART_Core.Middleware
             ArgumentNullException.ThrowIfNull(hubNameList);
 
             app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             var unique = hubNameList
@@ -160,6 +164,7 @@ namespace WART_Core.Middleware
                 throw new ArgumentException("Invalid hub name");
 
             app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             switch (hubType)
@@ -215,6 +220,7 @@ namespace WART_Core.Middleware
             ArgumentNullException.ThrowIfNull(hubNameList);
 
             app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             foreach (var hubName in hubNameList.Distinct())
