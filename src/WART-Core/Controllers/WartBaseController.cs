@@ -1,13 +1,15 @@
 ﻿// (c) 2024 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using WART_Core.Entity;
 using WART_Core.Filters;
-using Microsoft.Extensions.DependencyInjection;
 using WART_Core.Services;
 
 namespace WART_Core.Controllers
@@ -16,9 +18,10 @@ namespace WART_Core.Controllers
     {
         private readonly ILogger _logger;
         private readonly IHubContext<THub> _hubContext;
-        private const string RouteDataKey = "REQUEST";
 
-        private WartEventQueueService _eventQueue;
+        // Strongly-typed, collision-free key for HttpContext.Items
+        private sealed class RequestSnapshotKey { }
+        private static readonly object ItemsRequestKey = new RequestSnapshotKey();
 
         protected WartBaseController(IHubContext<THub> hubContext, ILogger logger)
         {
@@ -27,12 +30,19 @@ namespace WART_Core.Controllers
         }
 
         /// <summary>
-        /// Adds the request objects to RouteData.
+        /// Stores a snapshot of action arguments in <see cref="HttpContext.Items"/> 
+        /// under a collision-free typed key.
         /// </summary>
-        /// <param name="context">The action executing context.</param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            context?.RouteData.Values.Add(RouteDataKey, context.ActionArguments);
+            if (context is not null)
+            {
+                var snapshot = new ReadOnlyDictionary<string, object>(
+                    new Dictionary<string, object>(context.ActionArguments)
+                );
+                context.HttpContext.Items[ItemsRequestKey] = snapshot;
+            }
+
             base.OnActionExecuting(context);
         }
 
@@ -44,18 +54,23 @@ namespace WART_Core.Controllers
         {
             if (context?.Result is ObjectResult objectResult)
             {
-                var exclusion = context.Filters.Any(f => f.GetType().Name == nameof(ExcludeWartAttribute));
-                if (!exclusion && context.RouteData.Values.TryGetValue(RouteDataKey, out var request))
+                // Opt-out if ExcludeWartAttribute is present
+                var excluded = context.Filters.OfType<ExcludeWartAttribute>().Any();
+
+                if (!excluded && context.HttpContext.Items.TryGetValue(ItemsRequestKey, out var snapshotObj))
                 {
-                    var httpMethod = context.HttpContext?.Request.Method;
-                    var httpPath = context.HttpContext?.Request.Path;
-                    var remoteAddress = context.HttpContext?.Connection.RemoteIpAddress?.ToString();
-                    var response = objectResult.Value;
+                    var http = context.HttpContext;
 
-                    var wartEvent = new WartEvent(request, response, httpMethod, httpPath, remoteAddress);
+                    var wartEvent = new WartEvent(
+                        request: snapshotObj,
+                        response: objectResult.Value,
+                        httpMethod: http?.Request.Method,
+                        httpPath: http?.Request.Path,
+                        remoteAddress: http?.Connection.RemoteIpAddress?.ToString()
+                    );
 
-                    _eventQueue = context.HttpContext?.RequestServices.GetService<WartEventQueueService>();
-                    _eventQueue?.Enqueue(new WartEventWithFilters(wartEvent, [.. context.Filters]));
+                    var queue = context.HttpContext?.RequestServices.GetService<WartEventQueueService>();
+                    queue?.Enqueue(new WartEventWithFilters(wartEvent, [.. context.Filters]));
                 }
             }
 
