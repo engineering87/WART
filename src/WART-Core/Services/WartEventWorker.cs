@@ -48,7 +48,7 @@ namespace WART_Core.Services
             while (!stoppingToken.IsCancellationRequested)
             {
                 // Check if there are any connected clients.
-                if (!WartHubBase.HasConnectedClients)
+                if (!WartHubBase.HasConnectedClientsFor<THub>())
                 {
                     await Task.Delay(NoClientsDelayMs, stoppingToken);
                     continue;
@@ -92,6 +92,11 @@ namespace WART_Core.Services
         /// </summary>
         private async Task SendToHub(WartEvent wartEvent, List<IFilterMetadata> filters, CancellationToken cancellationToken)
         {
+            if (filters?.OfType<ExcludeWartAttribute>().Any() == true)
+            {
+                return;
+            }
+
             try
             {
                 // Retrieve the target groups based on the filters.
@@ -123,17 +128,15 @@ namespace WART_Core.Services
         /// </summary>
         /// <param name="filters">The list of filters that may contain group-related information.</param>
         /// <returns>A list of group names to send the WartEvent to.</returns>
-        private List<string> GetTargetGroups(List<IFilterMetadata> filters)
+        private static List<string> GetTargetGroups(List<IFilterMetadata> filters)
         {
-            var groups = new List<string>();
-
-            var groupAttr = filters?.OfType<GroupWartAttribute>().FirstOrDefault();
-            if (groupAttr is not null && groupAttr.GroupNames is not null)
-            {
-                groups.AddRange(groupAttr.GroupNames);
-            }
-
-            return groups;
+            var attr = filters?.OfType<GroupWartAttribute>().FirstOrDefault();
+            return attr?.GroupNames?
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s.Trim())
+                .Distinct(StringComparer.Ordinal)
+                .ToList()
+                ?? [];
         }
 
         /// <summary>
@@ -142,12 +145,13 @@ namespace WART_Core.Services
         private async Task SendEventToGroup(WartEvent wartEvent, string group, CancellationToken cancellationToken)
         {
             // Send the event to the group using SignalR.
-            await _hubContext?.Clients
+            await _hubContext.Clients
                 .Group(group)
                 .SendAsync("Send", wartEvent.ToString(), cancellationToken);
 
             // Log the event sent to the group.
-            _logger?.LogInformation($"Group: {group}, WartEvent: {wartEvent}");
+            _logger?.LogInformation("Group: {group}, WartEvent: {wartEvent}", 
+                group, wartEvent);
         }
 
         /// <summary>
@@ -156,11 +160,12 @@ namespace WART_Core.Services
         private async Task SendEventToAllClients(WartEvent wartEvent, CancellationToken cancellationToken)
         {
             // Send the event to all clients using SignalR.
-            await _hubContext?.Clients.All
+            await _hubContext.Clients.All
                 .SendAsync("Send", wartEvent.ToString(), cancellationToken);
 
             // Log the event sent to all clients.
-            _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}", nameof(WartEvent), wartEvent.ToString());
+            _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}", 
+                nameof(WartEvent), wartEvent.ToString());
         }
     }
 }

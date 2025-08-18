@@ -1,6 +1,7 @@
 ﻿// (c) 2019 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using Microsoft.AspNetCore.Mvc.Filters;
+using System;
 
 namespace WART_Core.Filters
 {
@@ -9,7 +10,8 @@ namespace WART_Core.Filters
     /// When applied to an action, this filter ensures that no SignalR events are triggered or broadcasted
     /// as a result of the execution of the action.
     /// </summary>
-    public class ExcludeWartAttribute : ActionFilterAttribute
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public sealed class ExcludeWartAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
