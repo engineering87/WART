@@ -68,6 +68,7 @@ namespace WART_Core.Authentication.JWT
                         ValidateIssuer = false,
                         ValidateActor = false,
                         ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
                         IssuerSigningKey = securityKey
                     };
                 options.Events = new JwtBearerEvents

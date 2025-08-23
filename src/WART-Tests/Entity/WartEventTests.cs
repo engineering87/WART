@@ -1,6 +1,8 @@
 ﻿// (c) 2024 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
-namespace WART_Core.Entity.Tests
+using WART_Core.Entity;
+
+namespace WART_Tests.Entity
 {
     public class WartEventTests
     {
@@ -17,14 +19,14 @@ namespace WART_Core.Entity.Tests
 
             // Assert
             Assert.NotEqual(Guid.Empty, wartEvent.EventId);
-            Assert.NotEqual(default(DateTime), wartEvent.TimeStamp);
-            Assert.NotEqual(default(DateTime), wartEvent.UtcTimeStamp);
+            Assert.NotEqual(default, wartEvent.TimeStamp);
+            Assert.NotEqual(default, wartEvent.UtcTimeStamp);
             Assert.Equal(httpMethod, wartEvent.HttpMethod);
             Assert.Equal(httpPath, wartEvent.HttpPath);
             Assert.Equal(remoteAddress, wartEvent.RemoteAddress);
-            Assert.Null(wartEvent.JsonRequestPayload);
-            Assert.Null(wartEvent.JsonResponsePayload);
-            Assert.Null(wartEvent.ExtraInfo);
+            Assert.True(string.IsNullOrEmpty(wartEvent.JsonRequestPayload));
+            Assert.True(string.IsNullOrEmpty(wartEvent.JsonResponsePayload));
+            Assert.True(string.IsNullOrEmpty(wartEvent.ExtraInfo));
         }
 
         [Fact]
@@ -42,14 +44,14 @@ namespace WART_Core.Entity.Tests
 
             // Assert
             Assert.NotEqual(Guid.Empty, wartEvent.EventId);
-            Assert.NotEqual(default(DateTime), wartEvent.TimeStamp);
-            Assert.NotEqual(default(DateTime), wartEvent.UtcTimeStamp);
+            Assert.NotEqual(default, wartEvent.TimeStamp);
+            Assert.NotEqual(default, wartEvent.UtcTimeStamp);
             Assert.Equal(httpMethod, wartEvent.HttpMethod);
             Assert.Equal(httpPath, wartEvent.HttpPath);
             Assert.Equal(remoteAddress, wartEvent.RemoteAddress);
-            Assert.NotNull(wartEvent.JsonRequestPayload);
-            Assert.NotNull(wartEvent.JsonResponsePayload);
-            Assert.Null(wartEvent.ExtraInfo);
+            Assert.False(string.IsNullOrEmpty(wartEvent.JsonRequestPayload));
+            Assert.False(string.IsNullOrEmpty(wartEvent.JsonResponsePayload));
+            Assert.True(string.IsNullOrEmpty(wartEvent.ExtraInfo));
         }
 
         [Fact]

@@ -151,7 +151,7 @@ namespace WART_Core.Services
 
             // Log the event sent to the group.
             _logger?.LogInformation("Group: {group}, WartEvent: {wartEvent}", 
-                group, wartEvent);
+                group, wartEvent.ToString());
         }
 
         /// <summary>

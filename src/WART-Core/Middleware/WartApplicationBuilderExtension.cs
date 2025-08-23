@@ -18,6 +18,13 @@ namespace WART_Core.Middleware
         private static string NormalizeHubPath(string name)
             => "/" + (name ?? string.Empty).Trim().Trim('/');
 
+        private static IReadOnlyList<string> GetDistinctPaths(IEnumerable<string> hubNameList)
+            => (hubNameList ?? [])
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(NormalizeHubPath)
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+
         /// <summary>
         /// Configures and adds the WART middleware to the IApplicationBuilder.
         /// This method sets up the default SignalR hub (warthub) without authentication.
@@ -219,45 +226,43 @@ namespace WART_Core.Middleware
         {
             ArgumentNullException.ThrowIfNull(hubNameList);
 
+            var paths = GetDistinctPaths(hubNameList);
+
             app.UseForwardedHeaders();
             app.UseResponseCompression();
             app.UseRouting();
 
-            foreach (var hubName in hubNameList.Distinct())
+            switch (hubType)
             {
-                switch (hubType)
-                {
-                    default:
-                    case HubType.NoAuthentication:
-                        {
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapControllers();
-                                endpoints.MapHub<WartHub>(NormalizeHubPath(hubName));
-                            });
-                            break;
-                        }
-                    case HubType.JwtAuthentication:
-                        {
-                            app.UseJwtMiddleware();
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapControllers();
-                                endpoints.MapHub<WartHubJwt>(NormalizeHubPath(hubName));
-                            });
-                            break;
-                        }
-                    case HubType.CookieAuthentication:
-                        {
-                            app.UseCookieMiddleware();
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapControllers();
-                                endpoints.MapHub<WartHubCookie>(NormalizeHubPath(hubName));
-                            });
-                            break;
-                        }
-                }
+                default:
+                case HubType.NoAuthentication:
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapControllers();
+                        foreach (var path in paths)
+                            endpoints.MapHub<WartHub>(path);
+                    });
+                    break;
+
+                case HubType.JwtAuthentication:
+                    app.UseJwtMiddleware();
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapControllers();
+                        foreach (var path in paths)
+                            endpoints.MapHub<WartHubJwt>(path);
+                    });
+                    break;
+
+                case HubType.CookieAuthentication:
+                    app.UseCookieMiddleware();
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapControllers();
+                        foreach (var path in paths)
+                            endpoints.MapHub<WartHubCookie>(path);
+                    });
+                    break;
             }
 
             return app;
