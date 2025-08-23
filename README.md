@@ -9,9 +9,29 @@
 
 <img src="https://github.com/engineering87/WART/blob/develop/wart_logo.jpg" width="300">
 
-WART is a C# .NET library that enables you to extend any Web API controller and forward incoming calls directly to a SignalR hub. This hub then broadcasts notifications containing detailed information about the calls, including both the request and the response. Additionally, WART supports JWT authentication for secure communication with SignalR.
+WART is a lightweight C# .NET library that extends your Web API controllers to forward incoming calls directly to a SignalR Hub.  
+The Hub broadcasts rich, structured events containing request and response details in **real-time**.  
+Supports **JWT** and **Cookie Authentication** for secure communication.
 
-## Features
+## 📑 Table of Contents
+- [Features](#-features)
+- [Installation](#-installation)
+- [How It Works](#️-how-it-works)
+- [Usage](#-usage)
+  - [Basic Setup](#basic-setup)
+  - [Using JWT Authentication](#using-jwt-authentication)
+  - [Custom Hub Names](#custom-hub-names)
+  - [Multiple Hubs](#multiple-hubs)
+  - [Client Example](#client-example)
+- [Supported Authentication Modes](#-supported-authentication-modes)
+- [Excluding APIs from Event Propagation](#-excluding-apis-from-event-propagation)
+- [Group-based Event Dispatching](#-group-based-event-dispatching)
+- [NuGet](#-nuget)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Contact](#-contact)
+
+## ✨ Features
 - Converts REST API calls into SignalR events, enabling real-time communication.
 - Provides controllers (`WartController`, `WartControllerJwt`, `WartControllerCookie`) for automatic SignalR event broadcasting.
 - Supports JWT authentication for SignalR hub connections.
@@ -19,19 +39,23 @@ WART is a C# .NET library that enables you to extend any Web API controller and 
 - Enables group-specific event dispatching with `[GroupWart("group_name")]`.
 - Configurable middleware (`AddWartMiddleware`) for flexible integration.
 
-## Installation
-You can install the library via the NuGet package manager with the following command:
+## 📦 Installation
+Install from **NuGet**
 
 ```bash
 dotnet add package WART-Core
 ```
 
-### How it works
-WART implements a custom controller which overrides the `OnActionExecuting` and `OnActionExecuted` methods to retrieve the request and the response and encapsulates them in a **WartEvent** object which will be sent via SignalR on the **WartHub**.
+### ⚙️ How it works
+WART overrides `OnActionExecuting` and `OnActionExecuted` in a custom base controller.
+For every API request/response:
+1) Captures request and response data.
+2) Wraps them in a `WartEvent`.
+3) Publishes it through a SignalR Hub to all connected clients.
 
-### How to use it
-
-To use the WART library, each WebApi controller must extend the **WartController** controller:
+## 🚀 Usage
+### Basic Setup
+Extend your API controllers from `WartController`:
 
 ```csharp
 using WART_Core.Controllers;
@@ -40,104 +64,99 @@ using WART_Core.Hubs;
 [ApiController]
 [Route("api/[controller]")]
 public class TestController : WartController
-```
-
-each controller must implement the following constructor, for example:
-
-```csharp
-public TestController(IHubContext<WartHub> messageHubContext, 
-ILogger<WartController> logger) : base(messageHubContext, logger)
 {
+    public TestController(IHubContext<WartHub> hubContext, ILogger<WartController> logger)
+        : base(hubContext, logger) { }
 }
 ```
 
-WART support JWT bearer authentication on SignalR hub, if you want to use JWT authentication use the following controller extension:
-
-```csharp
-using WART_Core.Controllers;
-using WART_Core.Hubs;
-
-[ApiController]
-[Route("api/[controller]")]
-public class TestController : WartControllerJwt
-```
-
-You also need to enable SignalR in the WebAPI solution and map the **WartHub**.
-To do this, add the following configurations in the Startup.cs class:
+Register WART in `Startup.cs`:
 
 ```csharp
 using WART_Core.Middleware;
+
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddWartMiddleware(); // No authentication
+}
+
+public void Configure(IApplicationBuilder app)
+{
+    app.UseWartMiddleware();
+}
 ```
 
-In the ConfigureServices section add following:
+### Using JWT Authentication
 
 ```csharp
-services.AddWartMiddleware();
-```
-
-or by specifying JWT authentication:
-
-
-```csharp
-services.AddWartMiddleware(hubType:HubType.JwtAuthentication, tokenKey:"password_here");
-```
-
-In the Configure section add the following:
-
-```csharp
-app.UseWartMiddleware();
-```
-
-or by specifying JWT authentication:
-
-```csharp
+services.AddWartMiddleware(hubType: HubType.JwtAuthentication, tokenKey: "your_secret_key");
 app.UseWartMiddleware(HubType.JwtAuthentication);
 ```
 
-Alternatively, it is possible to specify a custom hub name:
+Extend from `WartControllerJwt`:
 
 ```csharp
-app.UseWartMiddleware("hubname");
-```
-
-at this point it will be sufficient to connect via SignalR to the WartHub to receive notifications in real time of any call on the controller endpoints. 
-For example:
-
-```csharp
-var hubConnection = new HubConnectionBuilder()
-    .WithUrl("http://localhost:52086/warthub")
-    .Build();
-    
-hubConnection.On<string>("Send", (data) =>
+public class TestController : WartControllerJwt
 {
-  // data is the WartEvent JSON
-});
+    public TestController(IHubContext<WartHubJwt> hubContext, ILogger<WartControllerJwt> logger)
+        : base(hubContext, logger) { }
+}
 ```
 
-or with JWT authentication:
+### Custom Hub Names
+You can specify custom hub routes:
+
+```csharp
+app.UseWartMiddleware("customhub");
+```
+
+### Multiple Hubs
+You can configure multiple hubs at once by passing a list of hub names:
+
+```csharp
+var hubs = new[] { "orders", "products", "notifications" };
+
+app.UseWartMiddleware(hubs);
+```
+
+This is useful for separating traffic by domain.
+
+### Client Example
+#### Without authentication:
 
 ```csharp
 var hubConnection = new HubConnectionBuilder()
-    .WithUrl($"http://localhost:51392/warthub", options =>
+    .WithUrl("http://localhost:5000/warthub")
+    .Build();
+
+hubConnection.On<string>("Send", data =>
+{
+    // 'data' is a WartEvent JSON
+});
+
+await hubConnection.StartAsync();
+```
+
+#### With JWT authentication:
+
+```csharp
+var hubConnection = new HubConnectionBuilder()
+    .WithUrl("http://localhost:5000/warthub", options =>
     {
-        options.SkipNegotiation = true;
-        options.Transports = HttpTransportType.WebSockets;
         options.AccessTokenProvider = () => Task.FromResult(GenerateToken());
     })
     .WithAutomaticReconnect()
     .Build();
-    
-hubConnection.On<string>("Send", (data) =>
+
+hubConnection.On<string>("Send", data =>
 {
-  // data is the WartEvent JSON
+    // Handle WartEvent JSON
 });
+
+await hubConnection.StartAsync();
 ```
 
-In the source code you can find a simple test client and WebApi project.
-
-## Supported Authentication Modes
-
-The project supports three authentication modes for accessing the SignalR Hub:
+## 🔐 Supported Authentication Modes
 
 | Mode                     | Description                                                               | Hub Class           | Required Middleware      |
 |--------------------------|---------------------------------------------------------------------------|----------------------|---------------------------|
@@ -147,7 +166,7 @@ The project supports three authentication modes for accessing the SignalR Hub:
 
 > ⚙️ Authentication mode is selected through the `HubType` configuration in the application startup.
 
-### Excluding APIs from Event Propagation
+### 🚫 Excluding APIs from Event Propagation
 There might be scenarios where you want to exclude specific APIs from propagating events to connected clients. This can be particularly useful when certain endpoints should not trigger updates, notifications, or other real-time messages through SignalR. To achieve this, you can use a custom filter called `ExcludeWartAttribute`. By decorating the desired API endpoints with this attribute, you can prevent them from being included in the SignalR event propagation logic, for example:
 
 ```csharp
@@ -164,7 +183,7 @@ public ActionResult<TestEntity> Get(int id)
 }
 ```
 
-### SignalR Event Dispatching for Specific Groups
+### 👥 Group-based Event Dispatching
 WART enables sending API events to specific groups in SignalR by specifying the group name in the query string. This approach allows for flexible and targeted event broadcasting, ensuring that only the intended group of clients receives the event. 
 By decorating an API method with `[GroupWart("group_name")]`, it is possible to specify the SignalR group name to which the dispatch of specific events for that API is restricted. This ensures that only the clients subscribed to the specified group ("SampleGroupName") will receive the related events, allowing for targeted, group-based communication in a SignalR environment.
 
@@ -180,24 +199,20 @@ public ActionResult<TestEntity> Post([FromBody] TestEntity entity)
 
 By appending `?WartGroup=group_name` to the URL, the library enables dispatching events from individual APIs to a specific SignalR group, identified by `group_name`. This allows for granular control over which clients receive the event, leveraging SignalR’s built-in group functionality.
 
-### NuGet
+### 📦 NuGet
+The library is available on [NuGet](https://www.nuget.org/packages/WART-Core/).
 
-The library is available on NuGet packetmanager.
-
-https://www.nuget.org/packages/WART-Core/
-
-### Contributing
-Thank you for considering to help out with the source code!
-If you'd like to contribute, please fork, fix, commit and send a pull request for the maintainers to review and merge into the main code base.
-
-**Getting started with Git and GitHub**
+### 🤝 Contributing
+Contributions are welcome!
+Steps to get started:
 
  * [Setting up Git](https://docs.github.com/en/get-started/getting-started-with-git/set-up-git)
  * [Fork the repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)
  * [Open an issue](https://github.com/engineering87/WART/issues) if you encounter a bug or have a suggestion for improvements/features
+ * Submit a Pull Request.
 
-### Licensee
+### 📄 License
 WART source code is available under MIT License, see license in the source.
 
-### Contact
+### 📬 Contact
 Please contact at francesco.delre[at]protonmail.com for any details.
