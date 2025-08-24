@@ -1,14 +1,17 @@
 ﻿// (c) 2025 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
-using System;
-using System.IO;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using WART_Core.Hubs;
 using WART_Core.Services;
 
@@ -58,10 +61,10 @@ namespace WART_Core.Authentication.Cookie
                 });
 
             // Register WART event queue service
-            services.AddSingleton<WartEventQueueService>();
+            services.TryAddSingleton<WartEventQueueService>();
 
             // Register the WART event worker for the cookie-authenticated hub
-            services.AddHostedService<WartEventWorker<WartHubCookie>>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, WartEventWorker<WartHubCookie>>());
 
             // SignalR configuration
             services.AddSignalR(options =>
@@ -75,9 +78,13 @@ namespace WART_Core.Authentication.Cookie
             // Compression for SignalR WebSocket/Binary transport
             services.AddResponseCompression(opts =>
             {
-                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "application/octet-stream" });
+                opts.EnableForHttps = true;
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(["application/octet-stream"]);
+                opts.Providers.Add<BrotliCompressionProvider>();
+                opts.Providers.Add<GzipCompressionProvider>();
             });
+            services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+            services.Configure<GzipCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
 
             return services;
         }

@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO.Compression;
 using System.Linq;
 using WART_Core.Authentication.Cookie;
 using WART_Core.Authentication.JWT;
@@ -36,10 +39,10 @@ namespace WART_Core.Middleware
             services.AddLogging(configure => configure.AddConsole());
 
             // Register WART event queue as a singleton service.
-            services.AddSingleton<WartEventQueueService>();
+            services.TryAddSingleton<WartEventQueueService>();
 
             // Register the WART event worker as a hosted service.
-            services.AddHostedService<WartEventWorker<WartHub>>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, WartEventWorker<WartHub>>());
 
             // Configure SignalR with custom options.
             services.AddSignalR(options =>
@@ -53,9 +56,13 @@ namespace WART_Core.Middleware
             // Configure response compression for specific MIME types.
             services.AddResponseCompression(opts =>
             {
-                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "application/octet-stream" });
+                opts.EnableForHttps = true;
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(["application/octet-stream"]);
+                opts.Providers.Add<BrotliCompressionProvider>();
+                opts.Providers.Add<GzipCompressionProvider>();
             });
+            services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+            services.Configure<GzipCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
 
             return services;
         }

@@ -49,7 +49,7 @@ namespace WART_Core.Helpers
             }
             catch (Exception)
             {
-                return default(T);
+                return default;
             }
         }
     }

@@ -16,17 +16,55 @@ namespace WART_Core.Entity
     [Serializable]
     public class WartEvent
     {
+        /// <summary>
+        /// Unique identifier for this event instance.
+        /// </summary>
         public Guid EventId { get; set; }
+
+        /// <summary>
+        /// Local timestamp when the event was created. Intended to mirror
+        /// <see cref="UtcTimeStamp"/> converted to the local time zone.
+        /// </summary>
         public DateTime TimeStamp { get; set; }
+
+        /// <summary>
+        /// UTC timestamp when the event was created. Preferred for storage and comparisons.
+        /// </summary>
         public DateTime UtcTimeStamp { get; set; }
-        public string HttpMethod { get; set; }
-        public string HttpPath { get; set; }
-        public string RemoteAddress { get; set; }
+
+        /// <summary>
+        /// HTTP verb used by the request (e.g., GET, POST, PUT, DELETE).
+        /// </summary>
+        public string HttpMethod { get; set; } = string.Empty;
+
+        /// <summary>
+        /// HTTP path or route template of the request (e.g., "/api/orders/42").
+        /// </summary>
+        public string HttpPath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Remote client address (e.g., IP or "host:port") that originated the request.
+        /// </summary>
+        public string RemoteAddress { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Request payload serialized as JSON text. May contain either a JSON object or array.
+        /// Left as raw string to preserve the original body.
+        /// </summary>
         [JsonConverter(typeof(JsonArrayOrObjectStringConverter))]
-        public string JsonRequestPayload { get; set; }
+        public string JsonRequestPayload { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Response payload serialized as JSON text. May contain either a JSON object or array.
+        /// Left as raw string to preserve the original body.
+        /// </summary>
         [JsonConverter(typeof(JsonArrayOrObjectStringConverter))]
-        public string JsonResponsePayload { get; set; }
-        public string ExtraInfo { get; set; }
+        public string JsonResponsePayload { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Optional, free-form additional information (tags, notes, etc.).
+        /// </summary>
+        public string ExtraInfo { get; set; } = string.Empty;
 
         /// <summary>
         /// Private constructor used for JSON deserialization.
@@ -40,14 +78,20 @@ namespace WART_Core.Entity
         /// <param name="httpMethod">The HTTP method (e.g., GET, POST).</param>
         /// <param name="httpPath">The path of the HTTP request.</param>
         /// <param name="remoteAddress">The remote address (IP) from which the request originated.</param>
+        /// <summary>
+        /// Initializes a new instance with method, path and remote address.
+        /// </summary>
         public WartEvent(string httpMethod, string httpPath, string remoteAddress)
         {
-            this.EventId = Guid.NewGuid();
-            this.TimeStamp = DateTime.Now;
-            this.UtcTimeStamp = DateTime.UtcNow;
-            this.HttpMethod = httpMethod;
-            this.HttpPath = httpPath;
-            this.RemoteAddress = remoteAddress;
+            EventId = Guid.NewGuid();
+
+            var utcNow = DateTime.UtcNow;
+            UtcTimeStamp = utcNow;
+            TimeStamp = utcNow.ToLocalTime();
+
+            HttpMethod = httpMethod ?? string.Empty;
+            HttpPath = httpPath ?? string.Empty;
+            RemoteAddress = remoteAddress ?? string.Empty;
         }
 
         /// <summary>
@@ -61,14 +105,18 @@ namespace WART_Core.Entity
         /// <param name="remoteAddress">The remote address (IP) from which the request originated.</param>
         public WartEvent(object request, object response, string httpMethod, string httpPath, string remoteAddress)
         {
-            this.EventId = Guid.NewGuid();
-            this.TimeStamp = DateTime.Now;
-            this.UtcTimeStamp = DateTime.UtcNow;
-            this.HttpMethod = httpMethod;
-            this.HttpPath = httpPath;
-            this.RemoteAddress = remoteAddress;
-            this.JsonRequestPayload = SerializationHelper.Serialize(request);
-            this.JsonResponsePayload = SerializationHelper.Serialize(response);
+            EventId = Guid.NewGuid();
+
+            var utcNow = DateTime.UtcNow;
+            UtcTimeStamp = utcNow;
+            TimeStamp = utcNow.ToLocalTime();
+
+            HttpMethod = httpMethod ?? string.Empty;
+            HttpPath = httpPath ?? string.Empty;
+            RemoteAddress = remoteAddress ?? string.Empty;
+
+            JsonRequestPayload = SerializationHelper.Serialize(request);
+            JsonResponsePayload = SerializationHelper.Serialize(response);
         }
 
         /// <summary>

@@ -12,7 +12,7 @@ namespace WART_Core.Services
     public class WartEventQueueService
     {
         // A thread-safe queue to hold WartEvent objects along with their associated filters.
-        private readonly ConcurrentQueue<WartEventWithFilters> _queue = new ConcurrentQueue<WartEventWithFilters>();
+        private readonly ConcurrentQueue<WartEventWithFilters> _queue = new();
 
         /// <summary>
         /// Enqueues a WartEventWithFilters object to the queue.
@@ -20,8 +20,11 @@ namespace WART_Core.Services
         /// <param name="wartEventWithFilters">The WartEventWithFilters object to enqueue.</param>
         public void Enqueue(WartEventWithFilters wartEventWithFilters)
         {
-            // Adds the event with filters to the concurrent queue.
-            _queue.Enqueue(wartEventWithFilters);
+            if (wartEventWithFilters != null)
+            {
+                // Adds the event with filters to the concurrent queue.
+                _queue.Enqueue(wartEventWithFilters);
+            }
         }
 
         /// <summary>
@@ -29,15 +32,21 @@ namespace WART_Core.Services
         /// </summary>
         /// <param name="wartEventWithFilters">The dequeued WartEventWithFilters object.</param>
         /// <returns>True if an event was dequeued; otherwise, false.</returns>
-        public bool TryDequeue(out WartEventWithFilters wartEventWithFilters)
-        {
-            // Attempts to remove and return the event with filters from the queue.
-            return _queue.TryDequeue(out wartEventWithFilters);
-        }
+        public bool TryDequeue(out WartEventWithFilters item) => _queue.TryDequeue(out item);
+
+        /// <summary>
+        /// Attempts to peek at the next item without removing it.
+        /// </summary>
+        public bool TryPeek(out WartEventWithFilters item) => _queue.TryPeek(out item);
 
         /// <summary>
         /// Gets the current count of events in the queue.
         /// </summary>
         public int Count => _queue.Count;
+
+        /// <summary>
+        /// Check if the queue is empty
+        /// </summary>
+        public bool IsEmpty => _queue.IsEmpty;
     }
 }

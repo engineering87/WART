@@ -1,10 +1,12 @@
 ﻿// (c) 2024 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
-using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading.Tasks;
+using WART_Core.Utilities;
 
 namespace WART_Core.Hubs
 {
@@ -15,9 +17,10 @@ namespace WART_Core.Hubs
     public abstract class WartHubBase : Hub
     {
         /// <summary>
-        /// Stores active connections with their respective identifiers.
+        /// Stores active connections for each hub, with their respective identifiers.
         /// </summary>
-        private static readonly ConcurrentDictionary<string, string> _connections = new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, string>> _connectionsByHub
+            = new();
 
         /// <summary>
         /// Logger instance for logging hub activities.
@@ -41,17 +44,19 @@ namespace WART_Core.Hubs
         public override async Task OnConnectedAsync()
         {
             var httpContext = Context.GetHttpContext();
-            var wartGroup = httpContext.Request.Query["WartGroup"].ToString();
-            var userName = Context.User?.Identity?.Name ?? "Anonymous";
+            var wartGroup = httpContext?.Request?.Query["WartGroup"].ToString();
+            var userName = Context.User?.Identity?.Name ?? Context.UserIdentifier ?? "Anonymous";
 
-            _connections.TryAdd(Context.ConnectionId, userName);
+            var bucket = _connectionsByHub.GetOrAdd(GetType(), _ => new ConcurrentDictionary<string, string>());
+            bucket[Context.ConnectionId] = userName;
 
             if (!string.IsNullOrEmpty(wartGroup))
             {
                 await AddToGroup(wartGroup);
             }
 
-            _logger?.LogInformation($"OnConnect: ConnectionId={Context.ConnectionId}, User={userName}");
+            _logger?.LogInformation("OnConnected: ConnectionId={ConnectionId}, User={User}",
+                Context.ConnectionId, LogSanitizer.Sanitize(userName));
 
             await base.OnConnectedAsync();
         }
@@ -64,15 +69,19 @@ namespace WART_Core.Hubs
         /// <returns>A task that represents the asynchronous operation.</returns>
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            _connections.TryRemove(Context.ConnectionId, out _);
+            if (_connectionsByHub.TryGetValue(GetType(), out var dict))
+            {
+                dict.TryRemove(Context.ConnectionId, out _);
+                if (dict.IsEmpty) _connectionsByHub.TryRemove(GetType(), out _);
+            }
 
             if (exception != null)
             {
-                _logger?.LogWarning(exception, $"OnDisconnect with error: ConnectionId={Context.ConnectionId}");
+                _logger?.LogWarning(exception, "OnDisconnect with error: ConnectionId={ConnectionId}", Context.ConnectionId);
             }
             else
             {
-                _logger?.LogInformation($"OnDisconnect: ConnectionId={Context.ConnectionId}");
+                _logger?.LogInformation("OnDisconnect: ConnectionId={ConnectionId}", Context.ConnectionId);
             }
 
             return base.OnDisconnectedAsync(exception);
@@ -83,7 +92,7 @@ namespace WART_Core.Hubs
         /// </summary>
         /// <param name="groupName">The name of the SignalR group to add the connection to.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task AddToGroup(string groupName)
+        protected async Task AddToGroup(string groupName)
         {
             if (string.IsNullOrWhiteSpace(groupName))
             {
@@ -93,7 +102,8 @@ namespace WART_Core.Hubs
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
-            _logger?.LogInformation($"Connection {Context.ConnectionId} added to group {groupName}");
+            _logger?.LogInformation("Connection {ConnectionId} added to group {GroupName}",
+                Context.ConnectionId, LogSanitizer.Sanitize(groupName));
         }
 
         /// <summary>
@@ -101,7 +111,7 @@ namespace WART_Core.Hubs
         /// </summary>
         /// <param name="groupName">The name of the SignalR group to remove the connection from.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task RemoveFromGroup(string groupName)
+        protected async Task RemoveFromGroup(string groupName)
         {
             if (string.IsNullOrWhiteSpace(groupName))
             {
@@ -111,21 +121,20 @@ namespace WART_Core.Hubs
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 
-            _logger?.LogInformation($"Connection {Context.ConnectionId} removed from group {groupName}");
+            _logger?.LogInformation("Connection {ConnectionId} removed from group {GroupName}",
+                Context.ConnectionId, LogSanitizer.Sanitize(groupName));
         }
 
-        /// <summary>
-        /// Gets the current number of active connections.
-        /// </summary>
-        /// <returns>The count of active connections.</returns>
         public static int GetConnectionsCount()
-        {
-            return _connections.Count;
-        }
+            => _connectionsByHub.Values.Sum(d => d.Count);
 
-        /// <summary>
-        /// Returns a value indicating whether there are connected clients.
-        /// </summary>
-        public static bool HasConnectedClients => !_connections.IsEmpty;
+        public static bool HasConnectedClients
+            => _connectionsByHub.Values.Any(d => !d.IsEmpty);
+
+        public static int GetConnectionsCountFor<THub>() where THub : Hub
+            => _connectionsByHub.TryGetValue(typeof(THub), out var d) ? d.Count : 0;
+
+        public static bool HasConnectedClientsFor<THub>() where THub : Hub
+            => GetConnectionsCountFor<THub>() > 0;
     }
 }

@@ -15,6 +15,16 @@ namespace WART_Core.Middleware
     {
         private const string DefaultHubName = "warthub";
 
+        private static string NormalizeHubPath(string name)
+            => "/" + (name ?? string.Empty).Trim().Trim('/');
+
+        private static IReadOnlyList<string> GetDistinctPaths(IEnumerable<string> hubNameList)
+            => (hubNameList ?? [])
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(NormalizeHubPath)
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+
         /// <summary>
         /// Configures and adds the WART middleware to the IApplicationBuilder.
         /// This method sets up the default SignalR hub (warthub) without authentication.
@@ -23,15 +33,15 @@ namespace WART_Core.Middleware
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app)
         {
+            app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<WartHub>($"/{DefaultHubName}");
+                endpoints.MapHub<WartHub>(NormalizeHubPath(DefaultHubName));
             });
-
-            app.UseForwardedHeaders();
 
             return app;
         }
@@ -46,6 +56,8 @@ namespace WART_Core.Middleware
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, HubType hubType)
         {
+            app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             switch(hubType)
@@ -56,7 +68,7 @@ namespace WART_Core.Middleware
                         app.UseEndpoints(endpoints =>
                         {
                             endpoints.MapControllers();
-                            endpoints.MapHub<WartHub>($"/{DefaultHubName}");
+                            endpoints.MapHub<WartHub>(NormalizeHubPath(DefaultHubName));
                         });
                         break;
                     }
@@ -66,7 +78,7 @@ namespace WART_Core.Middleware
                         app.UseEndpoints(endpoints =>
                         {
                             endpoints.MapControllers();
-                            endpoints.MapHub<WartHubJwt>($"/{DefaultHubName}");
+                            endpoints.MapHub<WartHubJwt>(NormalizeHubPath(DefaultHubName));
                         });
                         break;
                     }
@@ -76,13 +88,11 @@ namespace WART_Core.Middleware
                         app.UseEndpoints(endpoints =>
                         {
                             endpoints.MapControllers();
-                            endpoints.MapHub<WartHubCookie>($"/{DefaultHubName}");
+                            endpoints.MapHub<WartHubCookie>(NormalizeHubPath(DefaultHubName));
                         });
                         break;
                     }
             }
-
-            app.UseForwardedHeaders();
 
             return app;
         }
@@ -94,21 +104,21 @@ namespace WART_Core.Middleware
         /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
         /// <param name="hubName">The custom SignalR hub name (URL path).</param>
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the hub name is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown when the hub name is null or empty.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, string hubName)
         {
             if (string.IsNullOrEmpty(hubName))
-                throw new ArgumentNullException("Invalid hub name");
+                throw new ArgumentException("Invalid hub name");
 
+            app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
+                endpoints.MapHub<WartHub>(NormalizeHubPath(hubName));
             });
-
-            app.UseForwardedHeaders();
 
             return app;
         }
@@ -121,23 +131,27 @@ namespace WART_Core.Middleware
         /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
         /// <param name="hubNameList">The list of custom SignalR hub names (URL paths).</param>
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the hub name list is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the hub name list is null.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, IEnumerable<string> hubNameList)
         {
             ArgumentNullException.ThrowIfNull(hubNameList);
 
+            app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
-            foreach (var hubName in hubNameList.Distinct())
-            {
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                    endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
-                });
-            }
+            var unique = hubNameList
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(NormalizeHubPath)
+                .Distinct()
+                .ToList();
 
-            app.UseForwardedHeaders();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                foreach (var path in unique)
+                    endpoints.MapHub<WartHub>(path);
+            });
 
             return app;
         }
@@ -150,12 +164,14 @@ namespace WART_Core.Middleware
         /// <param name="hubName">The custom SignalR hub name (URL path).</param>
         /// <param name="hubType">The type of SignalR hub to configure, determining if authentication is required.</param>
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the hub name is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown when the hub name is null or empty.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, string hubName, HubType hubType)
         {
             if (string.IsNullOrEmpty(hubName))
-                throw new ArgumentNullException("Invalid hub name");
+                throw new ArgumentException("Invalid hub name");
 
+            app.UseForwardedHeaders();
+            app.UseResponseCompression();
             app.UseRouting();
 
             switch (hubType)
@@ -166,7 +182,7 @@ namespace WART_Core.Middleware
                         app.UseEndpoints(endpoints =>
                         {
                             endpoints.MapControllers();
-                            endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
+                            endpoints.MapHub<WartHub>(NormalizeHubPath(hubName));
                         });
                         break;
                     }
@@ -176,7 +192,7 @@ namespace WART_Core.Middleware
                         app.UseEndpoints(endpoints =>
                         {
                             endpoints.MapControllers();
-                            endpoints.MapHub<WartHubJwt>($"/{hubName.Trim()}");
+                            endpoints.MapHub<WartHubJwt>(NormalizeHubPath(hubName));
                         });
                         break;
                     }
@@ -186,13 +202,11 @@ namespace WART_Core.Middleware
                         app.UseEndpoints(endpoints =>
                         {
                             endpoints.MapControllers();
-                            endpoints.MapHub<WartHubCookie>($"/{hubName.Trim()}");
+                            endpoints.MapHub<WartHubCookie>(NormalizeHubPath(hubName));
                         });
                         break;
                     }
             }
-
-            app.UseForwardedHeaders();
 
             return app;
         }
@@ -207,51 +221,49 @@ namespace WART_Core.Middleware
         /// <param name="hubNameList">The list of custom SignalR hub names (URL paths).</param>
         /// <param name="hubType">The type of SignalR hub to configure, determining if authentication is required.</param>
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the hub name list is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the hub name list is null.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, IEnumerable<string> hubNameList, HubType hubType)
         {
             ArgumentNullException.ThrowIfNull(hubNameList);
 
-            app.UseRouting();
-
-            foreach (var hubName in hubNameList.Distinct())
-            {
-                switch (hubType)
-                {
-                    default:
-                    case HubType.NoAuthentication:
-                        {
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapControllers();
-                                endpoints.MapHub<WartHub>($"/{hubName.Trim()}");
-                            });
-                            break;
-                        }
-                    case HubType.JwtAuthentication:
-                        {
-                            app.UseJwtMiddleware();
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapControllers();
-                                endpoints.MapHub<WartHubJwt>($"/{hubName.Trim()}");
-                            });
-                            break;
-                        }
-                    case HubType.CookieAuthentication:
-                        {
-                            app.UseCookieMiddleware();
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapControllers();
-                                endpoints.MapHub<WartHubCookie>($"/{hubName.Trim()}");
-                            });
-                            break;
-                        }
-                }
-            }
+            var paths = GetDistinctPaths(hubNameList);
 
             app.UseForwardedHeaders();
+            app.UseResponseCompression();
+            app.UseRouting();
+
+            switch (hubType)
+            {
+                default:
+                case HubType.NoAuthentication:
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapControllers();
+                        foreach (var path in paths)
+                            endpoints.MapHub<WartHub>(path);
+                    });
+                    break;
+
+                case HubType.JwtAuthentication:
+                    app.UseJwtMiddleware();
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapControllers();
+                        foreach (var path in paths)
+                            endpoints.MapHub<WartHubJwt>(path);
+                    });
+                    break;
+
+                case HubType.CookieAuthentication:
+                    app.UseCookieMiddleware();
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapControllers();
+                        foreach (var path in paths)
+                            endpoints.MapHub<WartHubCookie>(path);
+                    });
+                    break;
+            }
 
             return app;
         }
