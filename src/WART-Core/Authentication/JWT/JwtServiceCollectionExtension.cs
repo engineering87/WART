@@ -63,7 +63,7 @@ namespace WART_Core.Authentication.JWT
                 options.TokenValidationParameters =
                     new TokenValidationParameters
                     {
-                        LifetimeValidator = (before, expires, token, parameters) => expires > DateTime.UtcNow,
+                        LifetimeValidator = (before, expires, token, parameters) => expires != null && expires > DateTime.UtcNow,
                         ValidateAudience = false,
                         ValidateIssuer = false,
                         ValidateActor = false,
