@@ -42,7 +42,7 @@ namespace WART_Core.Services
         /// </summary>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("WartEventWorker started.");
+            _logger.LogDebug("WartEventWorker started.");
 
             // The worker will keep running as long as the cancellation token is not triggered.
             while (!stoppingToken.IsCancellationRequested)
@@ -83,7 +83,7 @@ namespace WART_Core.Services
                 await Task.Delay(IdleDelayMs, stoppingToken);
             }
 
-            _logger.LogInformation("WartEventWorker stopped.");
+            _logger.LogDebug("WartEventWorker stopped.");
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace WART_Core.Services
             catch (Exception ex)
             {
                 // Log errors that occur while sending events to SignalR clients.
-                _logger?.LogError(ex, "Error sending WartEvent to clients");
+                _logger?.LogError(ex, "Error while sending event {EventId}", wartEvent?.EventId);
 
                 throw;
             }
@@ -164,7 +164,7 @@ namespace WART_Core.Services
                 .SendAsync("Send", wartEvent.ToString(), cancellationToken);
 
             // Log the event sent to all clients.
-            _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}", 
+            _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}",
                 nameof(WartEvent), wartEvent.ToString());
         }
     }
