@@ -21,6 +21,7 @@ namespace WART_Tests.Middleware
                 {
                     configure.ConfigureServices(services =>
                     {
+                        services.AddWartMiddleware();
                         services.AddControllers();
                         services.AddSignalR();
                     });
