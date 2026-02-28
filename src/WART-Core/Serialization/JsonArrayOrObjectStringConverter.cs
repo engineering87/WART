@@ -25,7 +25,9 @@ namespace WART_Core.Serialization
                 JsonTokenType.String => reader.GetString(),
                 JsonTokenType.StartObject or JsonTokenType.StartArray => JsonDocument.ParseValue(ref reader).RootElement.GetRawText(),
                 JsonTokenType.Null => null,
-                _ => reader.GetString()
+                JsonTokenType.Number => JsonDocument.ParseValue(ref reader).RootElement.GetRawText(),
+                JsonTokenType.True or JsonTokenType.False => reader.GetBoolean().ToString(),
+                _ => throw new JsonException($"Unexpected token type: {reader.TokenType}")
             };
         }
 

@@ -28,7 +28,7 @@ namespace WART_Client
                     AllowAutoRedirect = true
                 };
 
-                using var httpClient = new HttpClient(handler);
+                using var httpClient = new HttpClient(handler, disposeHandler: false);
 
                 var loginContent = new FormUrlEncodedContent(new[]
                 {
@@ -66,7 +66,7 @@ namespace WART_Client
                 hubConnection.Closed += async (ex) =>
                 {
                     Console.WriteLine($"Connection closed: {ex?.Message}");
-                    await Task.Delay(new Random().Next(0, 5) * 1000);
+                    await Task.Delay(Random.Shared.Next(0, 5) * 1000);
                     if (hubConnection != null)
                         await hubConnection.StartAsync();
                 };

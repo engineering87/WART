@@ -26,6 +26,7 @@ namespace WART_Core.Services
 
         private const int NoClientsDelayMs = 500;
         private const int IdleDelayMs = 200;
+        private const int MaxRetryCount = 5;
 
         /// <summary>
         /// Constructor that initializes the worker with the event queue, hub context, and logger.
@@ -68,14 +69,29 @@ namespace WART_Core.Services
 
                         _logger.LogInformation("Event sent: {Event}", wartEvent);
                     }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        // Shutting down — re-enqueue without logging an error so
+                        // the event is not lost, then exit the loop.
+                        _eventQueue.Enqueue(wartEventWithFilters);
+                        break;
+                    }
                     catch (Exception ex)
                     {
                         // Log any errors that occur while sending the event.
                         _logger.LogError(ex, "Error while sending event.");
 
-                        // Re-enqueue the event for retry
-                        // We lost the order of the events, but we can't lose the events
-                        _eventQueue.Enqueue(wartEventWithFilters);
+                        // Re-enqueue the event for retry up to the maximum retry count.
+                        wartEventWithFilters.RetryCount++;
+                        if (wartEventWithFilters.RetryCount <= MaxRetryCount)
+                        {
+                            _eventQueue.Enqueue(wartEventWithFilters);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Event {EventId} dropped after {MaxRetries} retries.",
+                                wartEventWithFilters.WartEvent?.EventId, MaxRetryCount);
+                        }
                     }
                 }
 

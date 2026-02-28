@@ -43,7 +43,7 @@ namespace WART_Client
                 {
                     Console.WriteLine(exception);
                     Console.WriteLine(Environment.NewLine);
-                    await Task.Delay(new Random().Next(0, 5) * 1000);
+                    await Task.Delay(Random.Shared.Next(0, 5) * 1000);
                     await hubConnection.StartAsync();
                 };
 
