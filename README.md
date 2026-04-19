@@ -9,8 +9,8 @@
 
 <img src="https://github.com/engineering87/WART/blob/develop/wart_logo.jpg" width="300">
 
-WART is a lightweight C# .NET library that extends your Web API controllers to forward incoming calls directly to a SignalR Hub.  
-The Hub broadcasts rich, structured events containing request and response details in **real-time**.  
+WART is a lightweight C# .NET library that forwards your Web API calls directly to a SignalR Hub.  
+It works with both **Controllers** and **Minimal APIs**, broadcasting rich, structured events containing request and response details in **real-time**.  
 Supports **JWT** and **Cookie Authentication** for secure communication.
 
 ## 📑 Table of Contents
@@ -24,6 +24,7 @@ Supports **JWT** and **Cookie Authentication** for secure communication.
   - [Multiple Hubs](#multiple-hubs)
   - [Client Example](#client-example)
 - [Supported Authentication Modes](#-supported-authentication-modes)
+- [Minimal API Support](#-minimal-api-support)
 - [Excluding APIs from Event Propagation](#-excluding-apis-from-event-propagation)
 - [Group-based Event Dispatching](#-group-based-event-dispatching)
 - [NuGet](#-nuget)
@@ -33,7 +34,9 @@ Supports **JWT** and **Cookie Authentication** for secure communication.
 
 ## ✨ Features
 - Converts REST API calls into SignalR events, enabling real-time communication.
+- Works with both **Controllers** and **Minimal APIs**.
 - Provides controllers (`WartController`, `WartControllerJwt`, `WartControllerCookie`) for automatic SignalR event broadcasting.
+- Provides `UseWart()` endpoint filter for Minimal API support.
 - Supports JWT authentication for SignalR hub connections.
 - Allows API exclusion from event broadcasting with `[ExcludeWart]` attribute.
 - Enables group-specific event dispatching with `[GroupWart("group_name")]`.
@@ -47,8 +50,10 @@ dotnet add package WART-Core
 ```
 
 ### ⚙️ How it works
-WART overrides `OnActionExecuting` and `OnActionExecuted` in a custom base controller.
-For every API request/response:
+**Controllers:** WART overrides `OnActionExecuting` and `OnActionExecuted` in a custom base controller.  
+**Minimal APIs:** WART uses an `IEndpointFilter` (`WartEndpointFilter`) that intercepts the request pipeline.
+
+In both cases, for every API request/response:
 1) Captures request and response data.
 2) Wraps them in a `WartEvent`.
 3) Publishes it through a SignalR Hub to all connected clients.
@@ -155,6 +160,57 @@ hubConnection.On<string>("Send", data =>
 
 await hubConnection.StartAsync();
 ```
+
+### 🔌 Minimal API Support
+WART fully supports **Minimal APIs** via the `UseWart()` endpoint filter extension method. No base controller is needed.
+
+#### Basic usage
+
+```csharp
+using WART_Core.Middleware;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddWartMiddleware();
+
+var app = builder.Build();
+app.UseWartMiddleware();
+
+app.MapGet("/api/items", () => new[] { "item1", "item2" })
+   .UseWart();
+
+app.MapPost("/api/items", (Item item) => item)
+   .UseWart();
+
+app.Run();
+```
+
+#### Applying to a route group
+
+You can apply WART to all endpoints in a group at once:
+
+```csharp
+var group = app.MapGroup("/api/v2").UseWart();
+group.MapGet("/orders", () => GetOrders());
+group.MapPost("/orders", (Order o) => CreateOrder(o));
+```
+
+#### Excluding endpoints
+
+```csharp
+app.MapGet("/api/health", () => "ok")
+   .UseWart()
+   .ExcludeFromWart();
+```
+
+#### Group-based dispatching
+
+```csharp
+app.MapPost("/api/orders", (Order o) => CreateOrder(o))
+   .UseWart()
+   .WartGroup("admin", "managers");
+```
+
+> 💡 The `ExcludeWart` and `GroupWart` attributes work as endpoint metadata for Minimal APIs and as action filters for controllers — no breaking changes.
 
 ## 🔐 Supported Authentication Modes
 
