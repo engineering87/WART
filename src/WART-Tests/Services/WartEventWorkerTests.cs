@@ -126,5 +126,27 @@ namespace WART_Tests.Services
             queue.Enqueue(item);
             Assert.Equal(1, queue.Count);
         }
+
+        [Theory]
+        [InlineData(1, 200)]    // 200 * 2^0 = 200
+        [InlineData(2, 400)]    // 200 * 2^1 = 400
+        [InlineData(3, 800)]    // 200 * 2^2 = 800
+        [InlineData(4, 1600)]   // 200 * 2^3 = 1600
+        [InlineData(5, 3200)]   // 200 * 2^4 = 3200
+        [InlineData(10, 5000)]  // Would be 200 * 2^9 = 102400, capped to 5000
+        [InlineData(20, 5000)]  // Extremely high retry, still capped to 5000
+        [InlineData(25, 5000)]  // Shift clamped to 20-bit max, still capped to 5000
+        public void ExponentialBackoff_Delay_IsCappedAtMaxRetryDelayMs(int retryCount, int expectedDelayMs)
+        {
+            const int baseRetryDelayMs = 200;
+            const int maxRetryDelayMs = 5000;
+
+            var shift = Math.Min(retryCount - 1, 20);
+            var delayMs = Math.Min(
+                baseRetryDelayMs * (1 << shift),
+                maxRetryDelayMs);
+
+            Assert.Equal(expectedDelayMs, delayMs);
+        }
     }
 }

@@ -55,7 +55,15 @@ namespace WART_Core.Filters
                 .ToList() ?? [];
 
             var queue = httpContext.RequestServices.GetService(typeof(WartEventQueueService)) as WartEventQueueService;
-            queue?.Enqueue(new WartEventWithFilters(wartEvent, filters));
+            if (queue is not null)
+            {
+                queue.Enqueue(new WartEventWithFilters(wartEvent, filters));
+            }
+            else
+            {
+                // WartEventQueueService not registered — event will be lost.
+                System.Diagnostics.Debug.WriteLine("WartEventQueueService is not registered. Event was not enqueued.");
+            }
 
             return result;
         }

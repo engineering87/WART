@@ -25,8 +25,9 @@ namespace WART_Core.Services
         private readonly ILogger<WartEventWorker<THub>> _logger;
 
         private const int NoClientsDelayMs = 500;
-        private const int IdleDelayMs = 200;
         private const int MaxRetryCount = 5;
+        private const int BaseRetryDelayMs = 200;
+        private const int MaxRetryDelayMs = 5000;
 
         /// <summary>
         /// Constructor that initializes the worker with the event queue, hub context, and logger.
@@ -55,6 +56,9 @@ namespace WART_Core.Services
                     continue;
                 }
 
+                // Wait asynchronously until an event is available (no polling).
+                await _eventQueue.WaitToReadAsync(stoppingToken);
+
                 // Dequeue events and process them.
                 while (_eventQueue.TryDequeue(out var wartEventWithFilters))
                 {
@@ -81,10 +85,15 @@ namespace WART_Core.Services
                         // Log any errors that occur while sending the event.
                         _logger.LogError(ex, "Error while sending event.");
 
-                        // Re-enqueue the event for retry up to the maximum retry count.
+                        // Re-enqueue the event for retry with exponential backoff.
                         wartEventWithFilters.RetryCount++;
                         if (wartEventWithFilters.RetryCount <= MaxRetryCount)
                         {
+                            var shift = Math.Min(wartEventWithFilters.RetryCount - 1, 20);
+                            var delayMs = Math.Min(
+                                BaseRetryDelayMs * (1 << shift),
+                                MaxRetryDelayMs);
+                            await Task.Delay(delayMs, stoppingToken);
                             _eventQueue.Enqueue(wartEventWithFilters);
                         }
                         else
@@ -94,9 +103,6 @@ namespace WART_Core.Services
                         }
                     }
                 }
-
-                // Wait for 200 ms before checking for new events in the queue.
-                await Task.Delay(IdleDelayMs, stoppingToken);
             }
 
             _logger.LogDebug("WartEventWorker stopped.");

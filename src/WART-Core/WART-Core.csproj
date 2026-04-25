@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -12,8 +12,6 @@
     <RepositoryUrl>https://github.com/engineering87/WART</RepositoryUrl>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageLicenseExpression></PackageLicenseExpression>
-    <AssemblyVersion>6.0.1</AssemblyVersion>
-    <FileVersion>6.0.1</FileVersion>
     <Version>7.0.0</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -22,7 +20,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Duende.AspNetCore.Authentication.OAuth2Introspection" Version="7.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>

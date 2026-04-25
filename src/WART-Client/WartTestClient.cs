@@ -30,7 +30,7 @@ namespace WART_Client
                 hubConnection.On<string>("Send", (data) =>
                 {
                     Console.WriteLine(data);
-                    Console.WriteLine($"Message size: {Encoding.UTF8.GetBytes(data).Length} byte");
+                    Console.WriteLine($"Message size: {Encoding.UTF8.GetBytes(data ?? string.Empty).Length} byte");
                     Console.WriteLine(Environment.NewLine);
                 });
 
@@ -38,8 +38,15 @@ namespace WART_Client
                 {
                     Console.WriteLine(exception);
                     Console.WriteLine(Environment.NewLine);
-                    await Task.Delay(Random.Shared.Next(0, 5) * 1000);
-                    await hubConnection.StartAsync();
+                    try
+                    {
+                        await Task.Delay(Random.Shared.Next(0, 5) * 1000);
+                        await hubConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Reconnection failed: {ex.Message}");
+                    }
                 };
 
                 hubConnection.On<Exception>("ConnectionFailed", (exception) =>
