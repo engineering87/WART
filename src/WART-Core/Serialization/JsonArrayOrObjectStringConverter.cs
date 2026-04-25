@@ -20,13 +20,22 @@ namespace WART_Core.Serialization
         /// </summary>
         public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return reader.TokenType switch
+            switch (reader.TokenType)
             {
-                JsonTokenType.String => reader.GetString(),
-                JsonTokenType.StartObject or JsonTokenType.StartArray => JsonDocument.ParseValue(ref reader).RootElement.GetRawText(),
-                JsonTokenType.Null => null,
-                _ => reader.GetString()
-            };
+                case JsonTokenType.String:
+                    return reader.GetString();
+                case JsonTokenType.Null:
+                    return null;
+                case JsonTokenType.True or JsonTokenType.False:
+                    return reader.GetBoolean().ToString();
+                case JsonTokenType.StartObject or JsonTokenType.StartArray or JsonTokenType.Number:
+                    using (var doc = JsonDocument.ParseValue(ref reader))
+                    {
+                        return doc.RootElement.GetRawText();
+                    }
+                default:
+                    throw new JsonException($"Unexpected token type: {reader.TokenType}");
+            }
         }
 
         /// <summary>

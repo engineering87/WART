@@ -25,7 +25,9 @@ namespace WART_Core.Services
         private readonly ILogger<WartEventWorker<THub>> _logger;
 
         private const int NoClientsDelayMs = 500;
-        private const int IdleDelayMs = 200;
+        private const int MaxRetryCount = 5;
+        private const int BaseRetryDelayMs = 200;
+        private const int MaxRetryDelayMs = 5000;
 
         /// <summary>
         /// Constructor that initializes the worker with the event queue, hub context, and logger.
@@ -42,7 +44,7 @@ namespace WART_Core.Services
         /// </summary>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("WartEventWorker started.");
+            _logger.LogDebug("WartEventWorker started.");
 
             // The worker will keep running as long as the cancellation token is not triggered.
             while (!stoppingToken.IsCancellationRequested)
@@ -53,6 +55,9 @@ namespace WART_Core.Services
                     await Task.Delay(NoClientsDelayMs, stoppingToken);
                     continue;
                 }
+
+                // Wait asynchronously until an event is available (no polling).
+                await _eventQueue.WaitToReadAsync(stoppingToken);
 
                 // Dequeue events and process them.
                 while (_eventQueue.TryDequeue(out var wartEventWithFilters))
@@ -68,22 +73,39 @@ namespace WART_Core.Services
 
                         _logger.LogInformation("Event sent: {Event}", wartEvent);
                     }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        // Shutting down — re-enqueue without logging an error so
+                        // the event is not lost, then exit the loop.
+                        _eventQueue.Enqueue(wartEventWithFilters);
+                        break;
+                    }
                     catch (Exception ex)
                     {
                         // Log any errors that occur while sending the event.
                         _logger.LogError(ex, "Error while sending event.");
 
-                        // Re-enqueue the event for retry
-                        // We lost the order of the events, but we can't lose the events
-                        _eventQueue.Enqueue(wartEventWithFilters);
+                        // Re-enqueue the event for retry with exponential backoff.
+                        wartEventWithFilters.RetryCount++;
+                        if (wartEventWithFilters.RetryCount <= MaxRetryCount)
+                        {
+                            var shift = Math.Min(wartEventWithFilters.RetryCount - 1, 20);
+                            var delayMs = Math.Min(
+                                BaseRetryDelayMs * (1 << shift),
+                                MaxRetryDelayMs);
+                            await Task.Delay(delayMs, stoppingToken);
+                            _eventQueue.Enqueue(wartEventWithFilters);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Event {EventId} dropped after {MaxRetries} retries.",
+                                wartEventWithFilters.WartEvent?.EventId, MaxRetryCount);
+                        }
                     }
                 }
-
-                // Wait for 200 ms before checking for new events in the queue.
-                await Task.Delay(IdleDelayMs, stoppingToken);
             }
 
-            _logger.LogInformation("WartEventWorker stopped.");
+            _logger.LogDebug("WartEventWorker stopped.");
         }
 
         /// <summary>
@@ -117,7 +139,7 @@ namespace WART_Core.Services
             catch (Exception ex)
             {
                 // Log errors that occur while sending events to SignalR clients.
-                _logger?.LogError(ex, "Error sending WartEvent to clients");
+                _logger?.LogError(ex, "Error while sending event {EventId}", wartEvent?.EventId);
 
                 throw;
             }
@@ -164,7 +186,7 @@ namespace WART_Core.Services
                 .SendAsync("Send", wartEvent.ToString(), cancellationToken);
 
             // Log the event sent to all clients.
-            _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}", 
+            _logger?.LogInformation("Event: {EventName}, Details: {EventDetails}",
                 nameof(WartEvent), wartEvent.ToString());
         }
     }

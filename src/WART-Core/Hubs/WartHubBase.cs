@@ -72,7 +72,6 @@ namespace WART_Core.Hubs
             if (_connectionsByHub.TryGetValue(GetType(), out var dict))
             {
                 dict.TryRemove(Context.ConnectionId, out _);
-                if (dict.IsEmpty) _connectionsByHub.TryRemove(GetType(), out _);
             }
 
             if (exception != null)

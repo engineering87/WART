@@ -13,7 +13,6 @@ namespace WART_Core.Entity
     /// along with additional metadata such as timestamps and remote addresses.
     /// This class is serializable and designed to be used for logging or transmitting event data.
     /// </summary>
-    [Serializable]
     public class WartEvent
     {
         /// <summary>

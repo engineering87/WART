@@ -107,7 +107,7 @@ namespace WART_Core.Middleware
         /// <exception cref="ArgumentException">Thrown when the hub name is null or empty.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, string hubName)
         {
-            if (string.IsNullOrEmpty(hubName))
+            if (string.IsNullOrWhiteSpace(hubName))
                 throw new ArgumentException("Invalid hub name");
 
             app.UseForwardedHeaders();
@@ -143,7 +143,7 @@ namespace WART_Core.Middleware
             var unique = hubNameList
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Select(NormalizeHubPath)
-                .Distinct()
+                .Distinct(StringComparer.Ordinal)
                 .ToList();
 
             app.UseEndpoints(endpoints =>
@@ -167,7 +167,7 @@ namespace WART_Core.Middleware
         /// <exception cref="ArgumentException">Thrown when the hub name is null or empty.</exception>
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, string hubName, HubType hubType)
         {
-            if (string.IsNullOrEmpty(hubName))
+            if (string.IsNullOrWhiteSpace(hubName))
                 throw new ArgumentException("Invalid hub name");
 
             app.UseForwardedHeaders();

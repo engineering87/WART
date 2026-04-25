@@ -1,6 +1,7 @@
 ﻿// (c) 2024 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using Microsoft.AspNetCore.Mvc.Filters;
+using System;
 using System.Collections.Generic;
 
 namespace WART_Core.Entity
@@ -21,12 +22,19 @@ namespace WART_Core.Entity
         public List<IFilterMetadata> Filters { get; set; }
 
         /// <summary>
+        /// The number of times this event has been retried.
+        /// </summary>
+        public int RetryCount { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the WartEventWithFilters class.
         /// </summary>
         /// <param name="wartEvent">The WartEvent to associate with the filters.</param>
         /// <param name="filters">The list of filters applied to the event.</param>
         public WartEventWithFilters(WartEvent wartEvent, List<IFilterMetadata> filters)
         {
+            ArgumentNullException.ThrowIfNull(wartEvent);
+
             // Initialize the WartEvent and Filters properties
             WartEvent = wartEvent;
             Filters = filters;

@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace WART_Core.Helpers
 {
-    public class SerializationHelper
+    public static class SerializationHelper
     {
         // Default JSON serializer options to be used for serialization and deserialization.
         private static readonly JsonSerializerOptions DefaultOptions = new JsonSerializerOptions
