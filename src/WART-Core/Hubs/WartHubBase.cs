@@ -52,7 +52,16 @@ namespace WART_Core.Hubs
 
             if (!string.IsNullOrEmpty(wartGroup))
             {
-                await AddToGroup(wartGroup);
+                if (IsGroupSubscriptionAllowed())
+                {
+                    await AddToGroup(wartGroup);
+                }
+                else
+                {
+                    _logger?.LogWarning(
+                        "Group subscription denied for ConnectionId={ConnectionId}, User={User}: hub does not permit group subscriptions.",
+                        Context.ConnectionId, LogSanitizer.Sanitize(userName));
+                }
             }
 
             _logger?.LogInformation("OnConnected: ConnectionId={ConnectionId}, User={User}",
@@ -84,6 +93,17 @@ namespace WART_Core.Hubs
             }
 
             return base.OnDisconnectedAsync(exception);
+        }
+
+        /// <summary>
+        /// Determines whether the current connection is allowed to subscribe to a SignalR group.
+        /// Authenticated hubs return <c>true</c> only when the connecting principal is authenticated.
+        /// The default unauthenticated <see cref="WartHub"/> overrides this to return <c>false</c>.
+        /// </summary>
+        /// <returns><c>true</c> if group subscription is permitted; otherwise <c>false</c>.</returns>
+        protected virtual bool IsGroupSubscriptionAllowed()
+        {
+            return Context.User?.Identity?.IsAuthenticated == true;
         }
 
         /// <summary>

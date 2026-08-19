@@ -1,4 +1,4 @@
-ï»¿// (c) 2021 Francesco Del Re <francesco.delre.87@gmail.com>
+// (c) 2021 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -26,6 +26,17 @@ namespace WART_Core.Middleware
         /// </summary>
         /// <param name="services">The IServiceCollection to configure.</param>
         /// <returns>The updated IServiceCollection with WART middleware dependencies.</returns>
+        /// <remarks>
+        /// <b>SECURITY WARNING:</b> This overload configures an unauthenticated SignalR hub that
+        /// broadcasts live API request and response payloads to every connected client with no
+        /// credential check. Any anonymous network client can connect and receive sensitive data.
+        /// Use <see cref="AddWartMiddleware(IServiceCollection, HubType, string)"/> with
+        /// <c>HubType.JwtAuthentication</c> or <c>HubType.CookieAuthentication</c> instead.
+        /// See https://github.com/engineering87/WART/security/advisories
+        /// </remarks>
+        [Obsolete("AddWartMiddleware() without authentication broadcasts all API events to any anonymous client and is insecure. " +
+                  "Use AddWartMiddleware(HubType.JwtAuthentication, tokenKey) or AddWartMiddleware(HubType.CookieAuthentication) instead. " +
+                  "See https://github.com/engineering87/WART/security/advisories")]
         public static IServiceCollection AddWartMiddleware(this IServiceCollection services)
         {
             // Configure forwarded headers to support proxy scenarios (X-Forwarded-* headers).
@@ -81,12 +92,14 @@ namespace WART_Core.Middleware
             switch(hubType)
             {
                 default:
+#pragma warning disable CS0618 // Internal routing — intentional fallback to no-auth mode
                 case HubType.NoAuthentication:
                     {
                         // If no authentication is required, configure WART middleware without authentication.
                         services.AddWartMiddleware();
                         break;
                     }
+#pragma warning restore CS0618
                 case HubType.JwtAuthentication:
                     {
                         // If authentication is required, configure JWT middleware for authentication.

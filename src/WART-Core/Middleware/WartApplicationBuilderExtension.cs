@@ -1,4 +1,4 @@
-ï»¿// (c) 2021 Francesco Del Re <francesco.delre.87@gmail.com>
+// (c) 2021 Francesco Del Re <francesco.delre.87@gmail.com>
 // This code is licensed under MIT license (see LICENSE.txt for details)
 using Microsoft.AspNetCore.Builder;
 using System;
@@ -31,6 +31,16 @@ namespace WART_Core.Middleware
         /// </summary>
         /// <param name="app">The IApplicationBuilder to configure the middleware pipeline.</param>
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
+        /// <remarks>
+        /// <b>SECURITY WARNING:</b> This overload maps an unauthenticated SignalR hub that broadcasts
+        /// live API request and response payloads to every connected client with no credential check.
+        /// Use <see cref="UseWartMiddleware(IApplicationBuilder, HubType)"/> with
+        /// <c>HubType.JwtAuthentication</c> or <c>HubType.CookieAuthentication</c> instead.
+        /// See https://github.com/engineering87/WART/security/advisories
+        /// </remarks>
+        [Obsolete("UseWartMiddleware() without authentication broadcasts all API events to any anonymous client and is insecure. " +
+                  "Use UseWartMiddleware(HubType.JwtAuthentication) or UseWartMiddleware(HubType.CookieAuthentication) instead. " +
+                  "See https://github.com/engineering87/WART/security/advisories")]
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app)
         {
             app.UseForwardedHeaders();
@@ -63,6 +73,7 @@ namespace WART_Core.Middleware
             switch(hubType)
             {
                 default:
+#pragma warning disable CS0618 // Internal routing — intentional fallback to no-auth mode
                 case HubType.NoAuthentication:
                     {
                         app.UseEndpoints(endpoints =>
@@ -72,6 +83,7 @@ namespace WART_Core.Middleware
                         });
                         break;
                     }
+#pragma warning restore CS0618
                 case HubType.JwtAuthentication:
                     {
                         app.UseJwtMiddleware();
@@ -105,6 +117,16 @@ namespace WART_Core.Middleware
         /// <param name="hubName">The custom SignalR hub name (URL path).</param>
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
         /// <exception cref="ArgumentException">Thrown when the hub name is null or empty.</exception>
+        /// <remarks>
+        /// <b>SECURITY WARNING:</b> This overload maps an unauthenticated SignalR hub that broadcasts
+        /// live API request and response payloads to every connected client with no credential check.
+        /// Use <see cref="UseWartMiddleware(IApplicationBuilder, string, HubType)"/> with
+        /// <c>HubType.JwtAuthentication</c> or <c>HubType.CookieAuthentication</c> instead.
+        /// See https://github.com/engineering87/WART/security/advisories
+        /// </remarks>
+        [Obsolete("UseWartMiddleware(string) without authentication broadcasts all API events to any anonymous client and is insecure. " +
+                  "Use UseWartMiddleware(hubName, HubType.JwtAuthentication) or UseWartMiddleware(hubName, HubType.CookieAuthentication) instead. " +
+                  "See https://github.com/engineering87/WART/security/advisories")]
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, string hubName)
         {
             if (string.IsNullOrWhiteSpace(hubName))
@@ -132,6 +154,16 @@ namespace WART_Core.Middleware
         /// <param name="hubNameList">The list of custom SignalR hub names (URL paths).</param>
         /// <returns>The updated IApplicationBuilder to continue configuration.</returns>
         /// <exception cref="ArgumentException">Thrown when the hub name list is null.</exception>
+        /// <remarks>
+        /// <b>SECURITY WARNING:</b> This overload maps unauthenticated SignalR hubs that broadcast
+        /// live API request and response payloads to every connected client with no credential check.
+        /// Use <see cref="UseWartMiddleware(IApplicationBuilder, IEnumerable{string}, HubType)"/> with
+        /// <c>HubType.JwtAuthentication</c> or <c>HubType.CookieAuthentication</c> instead.
+        /// See https://github.com/engineering87/WART/security/advisories
+        /// </remarks>
+        [Obsolete("UseWartMiddleware(IEnumerable<string>) without authentication broadcasts all API events to any anonymous client and is insecure. " +
+                  "Use UseWartMiddleware(hubNameList, HubType.JwtAuthentication) or UseWartMiddleware(hubNameList, HubType.CookieAuthentication) instead. " +
+                  "See https://github.com/engineering87/WART/security/advisories")]
         public static IApplicationBuilder UseWartMiddleware(this IApplicationBuilder app, IEnumerable<string> hubNameList)
         {
             ArgumentNullException.ThrowIfNull(hubNameList);
@@ -177,6 +209,7 @@ namespace WART_Core.Middleware
             switch (hubType)
             {
                 default:
+#pragma warning disable CS0618 // Internal routing — intentional fallback to no-auth mode
                 case HubType.NoAuthentication:
                     {
                         app.UseEndpoints(endpoints =>
@@ -186,6 +219,7 @@ namespace WART_Core.Middleware
                         });
                         break;
                     }
+#pragma warning restore CS0618
                 case HubType.JwtAuthentication:
                     {
                         app.UseJwtMiddleware();
@@ -235,6 +269,7 @@ namespace WART_Core.Middleware
             switch (hubType)
             {
                 default:
+#pragma warning disable CS0618 // Internal routing — intentional fallback to no-auth mode
                 case HubType.NoAuthentication:
                     app.UseEndpoints(endpoints =>
                     {
@@ -243,6 +278,7 @@ namespace WART_Core.Middleware
                             endpoints.MapHub<WartHub>(path);
                     });
                     break;
+#pragma warning restore CS0618
 
                 case HubType.JwtAuthentication:
                     app.UseJwtMiddleware();
