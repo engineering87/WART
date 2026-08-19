@@ -27,9 +27,12 @@ namespace WART_Core.Authentication.JWT
         /// </summary>
         /// <param name="services">The service collection to add the middleware to.</param>
         /// <param name="tokenKey">The secret key used to sign and validate the JWT tokens.</param>
+        /// <param name="validIssuer">Optional. When provided, JWT issuer validation is enabled and tokens must match this value.</param>
+        /// <param name="validAudience">Optional. When provided, JWT audience validation is enabled and tokens must match this value.</param>
         /// <returns>The updated service collection.</returns>
         /// <exception cref="ArgumentNullException">Thrown if the token key is null or empty.</exception>
-        public static IServiceCollection AddJwtMiddleware(this IServiceCollection services, string tokenKey)
+        public static IServiceCollection AddJwtMiddleware(this IServiceCollection services, string tokenKey,
+            string validIssuer = null, string validAudience = null)
         {
             // Validate that the token key is provided
             if (string.IsNullOrEmpty(tokenKey))
@@ -64,8 +67,10 @@ namespace WART_Core.Authentication.JWT
                     new TokenValidationParameters
                     {
                         LifetimeValidator = (before, expires, token, parameters) => expires != null && expires > DateTime.UtcNow,
-                        ValidateAudience = false,
-                        ValidateIssuer = false,
+                        ValidateAudience = !string.IsNullOrEmpty(validAudience),
+                        ValidAudience = validAudience,
+                        ValidateIssuer = !string.IsNullOrEmpty(validIssuer),
+                        ValidIssuer = validIssuer,
                         ValidateActor = false,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
